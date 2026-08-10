@@ -598,6 +598,56 @@
       .habit-home-grid { gap: 3px; }
     }
 
+
+    /* V13 — calm sound */
+    .sound-icon-btn {
+      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text);
+      padding: 0;
+      transition: background .15s ease, color .15s ease, border-color .15s ease;
+    }
+    .sound-icon-btn svg { width: 21px; height: 21px; display: block; }
+    .sound-icon-btn.active {
+      background: var(--text);
+      color: var(--paper);
+      border-color: var(--text);
+    }
+    .sound-settings-card {
+      border-top: 1px solid #bdb4a6;
+      border-bottom: 1px solid #bdb4a6;
+      padding: 10px 0 12px;
+      margin-bottom: 18px;
+    }
+    .sound-settings-title { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+    .sound-settings-note { color: var(--muted); font-size: 11px; line-height: 1.45; margin: 5px 0 10px; }
+    .sound-mode-select {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      border-bottom: 1px solid #91887b;
+      border-radius: 0;
+      background: rgba(255,255,255,.12);
+      color: var(--text);
+      font-size: 15px;
+      padding: 7px 4px;
+      outline: none;
+    }
+    .sound-state-note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
 </style>
 </head>
 <body>
@@ -837,7 +887,8 @@
         { id: cryptoId(), name: 'No doomscrolling late', createdOn: localDateKey(new Date()), archivedOn: null },
         { id: cryptoId(), name: 'Bed on time', createdOn: localDateKey(new Date()), archivedOn: null }
       ],
-      habitLog: {}
+      habitLog: {},
+      soundMode: 'brown'
     };
 
     let data = loadData();
@@ -846,6 +897,11 @@
     let pickerDayId = null;
     let volumeWeekOffset = 0;
     let selectedHabitDate = null;
+
+    let calmAudioContext = null;
+    let calmAudioNodes = [];
+    let calmMasterGain = null;
+    let calmSoundOn = false;
 
     function structuredCloneSafe(obj) { return JSON.parse(JSON.stringify(obj)); }
 
@@ -863,6 +919,7 @@
       if (!d.history || typeof d.history !== 'object') d.history = {};
       if (!Array.isArray(d.habits)) d.habits = structuredCloneSafe(defaultData.habits);
       if (!d.habitLog || typeof d.habitLog !== 'object') d.habitLog = {};
+      if (!['brown','binaural10','tone852'].includes(d.soundMode)) d.soundMode = 'brown';
       d.habits.forEach(habit => {
         if (!habit.id) habit.id = cryptoId();
         if (!habit.name) habit.name = 'Untitled habit';
@@ -1866,13 +1923,128 @@
     }
     function closeQuoteGenerator() { document.getElementById('quoteBackdrop').classList.remove('open'); }
 
+    function calmSoundLabel(mode = data.soundMode) {
+      if (mode === 'binaural10') return '10 Hz binaural beat';
+      if (mode === 'tone852') return '852 Hz tone';
+      return 'Brown noise';
+    }
+
+    async function getCalmAudioContext() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) throw new Error('Web Audio is not supported in this browser.');
+      if (!calmAudioContext) calmAudioContext = new AudioCtx();
+      if (calmAudioContext.state === 'suspended') await calmAudioContext.resume();
+      return calmAudioContext;
+    }
+
+    function makeBrownNoiseSource(ctx) {
+      const seconds = 8;
+      const length = Math.floor(ctx.sampleRate * seconds);
+      const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+      const output = buffer.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < length; i++) {
+        const white = Math.random() * 2 - 1;
+        last = (last + 0.02 * white) / 1.02;
+        output[i] = Math.max(-1, Math.min(1, last * 3.5));
+      }
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      return source;
+    }
+
+    function updateCalmSoundButton() {
+      const btn = document.getElementById('soundHomeBtn');
+      if (!btn) return;
+      btn.classList.toggle('active', calmSoundOn);
+      btn.setAttribute('aria-pressed', calmSoundOn ? 'true' : 'false');
+      btn.title = calmSoundOn ? `Stop ${calmSoundLabel()}` : `Start ${calmSoundLabel()}`;
+      btn.setAttribute('aria-label', btn.title);
+    }
+
+    function stopCalmSound() {
+      calmAudioNodes.forEach(node => {
+        try { if (typeof node.stop === 'function') node.stop(); } catch {}
+        try { node.disconnect(); } catch {}
+      });
+      calmAudioNodes = [];
+      if (calmMasterGain) {
+        try { calmMasterGain.disconnect(); } catch {}
+        calmMasterGain = null;
+      }
+      calmSoundOn = false;
+      updateCalmSoundButton();
+    }
+
+    async function startCalmSound() {
+      stopCalmSound();
+      try {
+        const ctx = await getCalmAudioContext();
+        const master = ctx.createGain();
+        calmMasterGain = master;
+
+        if (data.soundMode === 'tone852') {
+          const osc = ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.value = 852;
+          master.gain.value = 0.018;
+          osc.connect(master);
+          master.connect(ctx.destination);
+          osc.start();
+          calmAudioNodes = [osc];
+        } else if (data.soundMode === 'binaural10') {
+          const leftOsc = ctx.createOscillator();
+          const rightOsc = ctx.createOscillator();
+          const leftGain = ctx.createGain();
+          const rightGain = ctx.createGain();
+          const merger = ctx.createChannelMerger(2);
+          leftOsc.type = rightOsc.type = 'sine';
+          leftOsc.frequency.value = 200;
+          rightOsc.frequency.value = 210;
+          leftGain.gain.value = 0.55;
+          rightGain.gain.value = 0.55;
+          master.gain.value = 0.028;
+          leftOsc.connect(leftGain);
+          rightOsc.connect(rightGain);
+          leftGain.connect(merger, 0, 0);
+          rightGain.connect(merger, 0, 1);
+          merger.connect(master);
+          master.connect(ctx.destination);
+          leftOsc.start();
+          rightOsc.start();
+          calmAudioNodes = [leftOsc, rightOsc, leftGain, rightGain, merger];
+        } else {
+          const source = makeBrownNoiseSource(ctx);
+          master.gain.value = 0.075;
+          source.connect(master);
+          master.connect(ctx.destination);
+          source.start();
+          calmAudioNodes = [source];
+        }
+        calmSoundOn = true;
+        updateCalmSoundButton();
+      } catch (err) {
+        calmSoundOn = false;
+        updateCalmSoundButton();
+        alert('Your browser could not start the calm sound. Try opening the app in Safari and tap the sound button again.');
+      }
+    }
+
+    function toggleCalmSound() {
+      if (calmSoundOn) stopCalmSound();
+      else startCalmSound();
+    }
+
     function renderHome() {
       currentDayId = null;
       const app = document.getElementById('app');
-      app.innerHTML = `<div class="header home-header"><div><h1>Gym</h1><p class="subtitle">Choose today's workout</p></div><div class="home-actions"><button class="home-icon-btn" id="habitsHomeBtn" aria-label="Habits" title="Habits"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg></button><button class="volume-icon-btn" id="volumeHomeBtn" aria-label="Weekly muscle sets" title="Weekly muscle sets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 19V12M12 19V5M19 19V9"/><path d="M3 19h18"/></svg></button></div></div><div class="home-quote" id="homeQuoteBtn" role="button" aria-label="Show another motivation quote"><p class="home-quote-text" id="homeQuoteText"></p><div class="home-quote-hint">tap for another</div></div><div class="habit-home-grid" id="habitHomeGrid" aria-label="Last 30 days habit completion"></div><div class="day-list" id="dayList"></div>`;
+      app.innerHTML = `<div class="header home-header"><div><h1>Gym</h1><p class="subtitle">Choose today's workout</p></div><div class="home-actions"><button class="sound-icon-btn" id="soundHomeBtn" aria-label="Start calm sound" aria-pressed="false" title="Start calm sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18 6a8.5 8.5 0 0 1 0 12"/></svg></button><button class="home-icon-btn" id="habitsHomeBtn" aria-label="Habits" title="Habits"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg></button><button class="volume-icon-btn" id="volumeHomeBtn" aria-label="Weekly muscle sets" title="Weekly muscle sets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 19V12M12 19V5M19 19V9"/><path d="M3 19h18"/></svg></button></div></div><div class="home-quote" id="homeQuoteBtn" role="button" aria-label="Show another motivation quote"><p class="home-quote-text" id="homeQuoteText"></p><div class="home-quote-hint">tap for another</div></div><div class="habit-home-grid" id="habitHomeGrid" aria-label="Last 30 days habit completion"></div><div class="day-list" id="dayList"></div>`;
       showAnotherHomeQuote();
       renderHabitHomeGrid();
       document.getElementById('homeQuoteBtn').addEventListener('click', showAnotherHomeQuote);
+      document.getElementById('soundHomeBtn').addEventListener('click', toggleCalmSound);
+      updateCalmSoundButton();
       document.getElementById('habitsHomeBtn').addEventListener('click', () => openHabits());
       document.getElementById('volumeHomeBtn').addEventListener('click', openWeeklyVolume);
       const dayList = document.getElementById('dayList');
@@ -2014,8 +2186,27 @@
 
     function renderSettings() {
       const wrap = document.getElementById('settingsContent');
-      wrap.innerHTML = '';
-      if (!data.days.length) wrap.innerHTML = '<div class="empty" style="margin-bottom:12px">Add your first workout day below.</div>';
+      wrap.innerHTML = `
+        <div class="sound-settings-card">
+          <div class="sound-settings-title">Calm sound</div>
+          <div class="sound-settings-note">Choose what the speaker button plays. Brown noise is the default because no single “healing frequency” is proven to stop overthinking.</div>
+          <select class="sound-mode-select" id="soundModeSelect" aria-label="Calm sound mode">
+            <option value="brown">Brown noise — default</option>
+            <option value="binaural10">10 Hz binaural beat — headphones</option>
+            <option value="tone852">852 Hz pure tone — preference only</option>
+          </select>
+          <div class="sound-state-note">Starts at a low app level. Use your iPhone volume at a comfortable level. 10 Hz binaural mode uses 200 Hz in one ear and 210 Hz in the other.</div>
+        </div>`;
+      const soundSelect = document.getElementById('soundModeSelect');
+      soundSelect.value = data.soundMode || 'brown';
+      soundSelect.addEventListener('change', async () => {
+        const wasOn = calmSoundOn;
+        data.soundMode = soundSelect.value;
+        saveData();
+        if (wasOn) await startCalmSound();
+        updateCalmSoundButton();
+      });
+      if (!data.days.length) wrap.insertAdjacentHTML('beforeend', '<div class="empty" style="margin-bottom:12px">Add your first workout day below.</div>');
 
       data.days.forEach(day => {
         const card = document.createElement('div');
@@ -2178,6 +2369,11 @@
     document.getElementById('addDayBtn').addEventListener('click', () => { data.days.push({id:cryptoId(),name:'New Workout',exercises:[]}); saveData(); renderSettings(); });
 
     saveData();
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && calmSoundOn) stopCalmSound();
+    });
+    window.addEventListener('pagehide', stopCalmSound);
+
     renderHome();
   </script>
 </body>

@@ -718,10 +718,12 @@
       {id:'cable_fly',name:'Cable Fly',category:'Chest',min:10,max:20,increment:2.5,primary:['Pectoralis major'],secondary:['Anterior deltoid'],note:'Isolation-style chest work; higher reps are practical because systemic fatigue is low.'},
       {id:'pec_deck',name:'Pec Deck',category:'Chest',min:10,max:20,increment:5,primary:['Pectoralis major'],secondary:['Anterior deltoid'],note:'Very stable chest isolation exercise that is easy to take close to failure.'},
       {id:'db_fly',name:'Dumbbell Fly',category:'Chest',min:8,max:15,increment:2.5,primary:['Pectoralis major'],secondary:['Anterior deltoid'],note:'Use a controlled stretch and avoid forcing excessive shoulder range.'},
+      {id:'incline_machine_press',name:'Incline Chest Press',aliases:['Incline Machine Chest Press'],category:'Chest',min:6,max:10,increment:5,primary:['Upper chest'],secondary:['Anterior deltoid','Triceps brachii'],note:'Stable upper-chest press. Use a comfortable incline and controlled full range.'},
+      {id:'decline_cable_fly',name:'Decline Cable Fly',aliases:['High-to-Low Cable Fly'],category:'Chest',min:10,max:15,increment:2.5,primary:['Lower chest'],secondary:['Anterior deltoid'],note:'High-to-low cable path for lower-chest-focused isolation work. Keep the movement controlled and avoid turning it into a press.'},
 
       {id:'lat_pulldown',name:'Lat Pulldown',category:'Back',min:6,max:12,increment:5,primary:['Latissimus dorsi'],secondary:['Biceps brachii','Brachialis','Teres major','Mid/lower trapezius'],note:'Grip variations do not appear to radically change lat recruitment; choose a grip that is strong and comfortable.'},
       {id:'pull_up',name:'Pull-Up',category:'Back',min:5,max:10,increment:2.5,primary:['Latissimus dorsi'],secondary:['Biceps brachii','Brachialis','Teres major','Mid/lower trapezius'],note:'Excellent vertical pull. Add load once bodyweight reps are consistently at the top of the range.'},
-      {id:'assisted_pullup',name:'Assisted Pull-Up',category:'Back',min:6,max:12,increment:5,primary:['Latissimus dorsi'],secondary:['Biceps brachii','Brachialis','Teres major','Mid/lower trapezius'],note:'Progress by reducing assistance rather than adding weight.'},
+      {id:'assisted_pullup',name:'Assisted Pull-Up',category:'Back',min:6,max:10,increment:5,loadType:'assistance',primary:['Latissimus dorsi'],secondary:['Biceps brachii','Brachialis','Teres major','Mid/lower trapezius'],note:'Progress by reducing assistance once all working sets reach the top of the rep range.'},
       {id:'chest_supported_row',name:'Chest-Supported Row',category:'Back',min:6,max:12,increment:2.5,primary:['Latissimus dorsi','Rhomboids','Middle trapezius'],secondary:['Posterior deltoid','Biceps brachii','Brachialis'],note:'Chest support reduces lower-back fatigue and makes the upper-back musculature easier to load hard.'},
       {id:'seated_row',name:'Seated Row',aliases:['Seated Cable Row'],category:'Back',min:6,max:12,increment:5,primary:['Latissimus dorsi','Rhomboids','Middle trapezius'],secondary:['Posterior deltoid','Biceps brachii','Brachialis'],note:'Use a controlled reach and pull without turning it into a lower-back movement.'},
       {id:'barbell_row',name:'Barbell Row',category:'Back',min:5,max:10,increment:2.5,primary:['Latissimus dorsi','Rhomboids','Middle trapezius'],secondary:['Posterior deltoid','Biceps brachii','Spinal erectors'],note:'Effective but more systemically fatiguing than chest-supported or machine rows.'},
@@ -729,6 +731,8 @@
       {id:'machine_row',name:'Machine Row',category:'Back',min:8,max:15,increment:5,primary:['Latissimus dorsi','Rhomboids','Middle trapezius'],secondary:['Posterior deltoid','Biceps brachii'],note:'High stability makes close-to-failure work practical.'},
       {id:'straight_arm_pd',name:'Straight-Arm Pulldown',category:'Back',min:10,max:20,increment:2.5,primary:['Latissimus dorsi'],secondary:['Teres major','Long head triceps (isometric/supporting)'],note:'Lat-focused shoulder-extension movement with little elbow-flexor limitation.'},
       {id:'cable_pullover',name:'Cable Pullover',category:'Back',min:10,max:20,increment:2.5,primary:['Latissimus dorsi'],secondary:['Teres major','Pectoralis major'],note:'Useful lat isolation-style movement when performed through a controlled stretch.'},
+      {id:'close_grip_tbar_row',name:'Close-Grip T-Bar Row',category:'Back',min:6,max:10,increment:5,primary:['Latissimus dorsi','Rhomboids','Middle trapezius'],secondary:['Posterior deltoid','Biceps brachii','Brachialis'],note:'Heavy close-grip row for lats and upper back. Keep the torso stable and drive the elbows back.'},
+      {id:'single_arm_cable_lat_row',name:'Single-Arm Cable Lat Row',category:'Back',min:10,max:15,increment:2.5,primary:['Latissimus dorsi'],secondary:['Rhomboids','Biceps brachii','Posterior deltoid'],note:'Unilateral lat-focused row. Keep the shoulder controlled and pull the elbow toward the hip.'},
 
       {id:'ohp',name:'Overhead Press',aliases:['Barbell Overhead Press'],category:'Shoulders',min:5,max:10,increment:2.5,primary:['Anterior deltoid'],secondary:['Lateral deltoid','Triceps brachii','Upper chest'],note:'Heavy compound shoulder press; front delts and triceps do most of the work.'},
       {id:'db_shoulder_press',name:'Dumbbell Shoulder Press',category:'Shoulders',min:6,max:12,increment:2.5,primary:['Anterior deltoid'],secondary:['Lateral deltoid','Triceps brachii'],note:'Good compound shoulder option with freedom to use a comfortable arm path.'},
@@ -752,10 +756,13 @@
       {id:'skullcrusher',name:'Skull Crusher',aliases:['Lying Triceps Extension'],category:'Triceps',min:8,max:15,increment:2.5,primary:['Triceps brachii'],secondary:['Anconeus'],note:'Use a controlled elbow path and a load that does not irritate the elbows.'},
       {id:'close_grip_bench',name:'Close-Grip Bench Press',category:'Triceps',min:6,max:10,increment:2.5,primary:['Triceps brachii'],secondary:['Pectoralis major','Anterior deltoid'],note:'Heavy triceps-focused press, although the chest and front delts still contribute.'},
       {id:'dip',name:'Dip',category:'Triceps',min:6,max:12,increment:2.5,primary:['Triceps brachii','Pectoralis major'],secondary:['Anterior deltoid'],note:'Torso angle and elbow path alter the relative chest/triceps contribution.'},
+      {id:'assisted_triceps_dip',name:'Assisted Triceps Dip',aliases:['Assisted Dip'],category:'Triceps',min:8,max:12,increment:5,loadType:'assistance',primary:['Triceps brachii'],secondary:['Lower chest','Anterior deltoid'],note:'Use an upright torso and triceps-focused elbow path. Progress by reducing assistance, not increasing it.'},
+      {id:'single_arm_pushdown',name:'Single-Arm Cable Pushdown',category:'Triceps',min:10,max:15,increment:2.5,primary:['Triceps brachii'],secondary:['Anconeus'],note:'Single-arm pushdown that is easy to standardise side-to-side. Keep the upper arm still.'},
 
       {id:'back_squat',name:'Squat',aliases:['Back Squat'],category:'Legs',min:5,max:10,increment:2.5,primary:['Quadriceps','Gluteus maximus'],secondary:['Adductors','Spinal erectors'],note:'Large compound movement. Full comfortable depth generally provides more complete muscular loading than deliberately shallow reps.'},
       {id:'front_squat',name:'Front Squat',category:'Legs',min:5,max:10,increment:2.5,primary:['Quadriceps','Gluteus maximus'],secondary:['Adductors','Spinal erectors','Upper back'],note:'Quad-focused squat pattern with substantial trunk demand.'},
       {id:'hack_squat',name:'Hack Squat',category:'Legs',min:6,max:12,increment:5,primary:['Quadriceps','Gluteus maximus'],secondary:['Adductors'],note:'Stable squat pattern that makes hard quad-focused sets easier to standardize.'},
+      {id:'close_stance_hack',name:'Close-Stance Hack Squat',category:'Legs',min:8,max:12,increment:5,primary:['Quadriceps'],secondary:['Gluteus maximus','Adductors'],note:'Quad-biased hack squat setup. Use a stance and depth that are comfortable for your knees and hips.'},
       {id:'leg_press',name:'Leg Press',category:'Legs',min:8,max:15,increment:10,primary:['Quadriceps','Gluteus maximus'],secondary:['Adductors','Hamstrings'],note:'Highly stable lower-body compound; useful for high local effort with less balance demand.'},
       {id:'leg_extension',name:'Leg Extension',category:'Legs',min:10,max:20,increment:5,primary:['Quadriceps'],secondary:[],note:'Direct knee-extension work. Squats and leg extensions can produce different regional quadriceps growth, so both can have a place.'},
       {id:'bulgarian_split',name:'Bulgarian Split Squat',category:'Legs',min:6,max:12,increment:2.5,primary:['Quadriceps','Gluteus maximus'],secondary:['Adductors','Hamstrings'],note:'Unilateral compound that trains quads and glutes through a large range of motion.'},
@@ -768,6 +775,9 @@
       {id:'glute_bridge',name:'Glute Bridge',category:'Legs',min:8,max:15,increment:5,primary:['Gluteus maximus'],secondary:['Hamstrings'],note:'Stable hip-extension movement with a shorter ROM than many squat/hinge patterns.'},
       {id:'good_morning',name:'Good Morning',category:'Legs',min:6,max:10,increment:2.5,primary:['Hamstrings','Gluteus maximus'],secondary:['Spinal erectors','Adductors'],note:'Use conservative loading and strict hinge mechanics.'},
       {id:'back_extension',name:'45° Back Extension',category:'Legs',min:8,max:15,increment:2.5,primary:['Gluteus maximus','Hamstrings'],secondary:['Spinal erectors'],note:'Can be biased toward hip extension by keeping the spine controlled and moving at the hips.'},
+      {id:'weighted_lower_back_extension',name:'Weighted Lower Back Extension',category:'Legs',min:8,max:15,increment:2.5,primary:['Spinal erectors'],secondary:['Gluteus maximus','Hamstrings'],note:'Lower-back-focused back extension. Use controlled spinal positioning and stop if the movement causes pain rather than muscular fatigue.'},
+      {id:'hip_adductor_machine',name:'Inner Thigh Machine',aliases:['Hip Adductor Machine'],category:'Legs',min:10,max:15,increment:5,primary:['Adductors'],secondary:[],note:'Direct inner-thigh work. Use a controlled stretch and avoid bouncing out of the bottom position.'},
+      {id:'hip_abductor_machine',name:'Outer Thigh Machine',aliases:['Hip Abductor Machine'],category:'Legs',min:10,max:15,increment:5,primary:['Gluteus medius/minimus'],secondary:['Gluteus maximus'],note:'Direct outer-glute/hip-abductor work. Keep the pelvis stable rather than rocking to move more weight.'},
       {id:'standing_calf',name:'Standing Calf Raise',category:'Calves',min:8,max:15,increment:5,primary:['Gastrocnemius'],secondary:['Soleus'],note:'Direct research found substantially greater gastrocnemius growth with standing than seated calf raises.'},
       {id:'seated_calf',name:'Seated Calf Raise',category:'Calves',min:10,max:20,increment:5,primary:['Soleus'],secondary:['Gastrocnemius'],note:'Bent-knee position reduces gastrocnemius contribution and makes this useful for soleus-focused work.'},
 
@@ -781,6 +791,7 @@
 
     const SIMPLE_MUSCLE_NAMES = {
       'Pectoralis major':'Chest',
+      'Lower chest':'Lower chest',
       'Clavicular pectoralis major (upper chest)':'Upper chest',
       'Triceps brachii':'Triceps',
       'Triceps brachii (especially long head)':'Long triceps head',
@@ -804,6 +815,7 @@
       'Anconeus':'Elbow stabilisers',
       'Quadriceps':'Quads',
       'Gluteus maximus':'Glutes',
+      'Gluteus medius/minimus':'Outer glutes',
       'Adductors':'Inner thighs',
       'Spinal erectors':'Lower back',
       'Gastrocnemius':'Upper calves',
@@ -823,7 +835,9 @@
       overhead_triceps: {primary:['Long triceps head'], secondary:['Side triceps head','Inner triceps head']},
       skullcrusher: {primary:['Long triceps head','Side triceps head'], secondary:['Inner triceps head']},
       close_grip_bench: {primary:['Triceps (all 3 heads)'], secondary:['Chest','Front delts']},
-      dip: {primary:['Triceps','Chest'], secondary:['Front delts']}
+      dip: {primary:['Triceps','Chest'], secondary:['Front delts']},
+      assisted_triceps_dip: {primary:['Triceps'], secondary:['Lower chest','Front delts']},
+      single_arm_pushdown: {primary:['Side triceps head','Inner triceps head'], secondary:['Long triceps head']}
     };
 
     function simpleMuscleName(name) { return SIMPLE_MUSCLE_NAMES[name] || name; }
@@ -833,9 +847,9 @@
       return (lib[role] || []).map(simpleMuscleName);
     }
 
-    const MAJOR_MUSCLES = ['Chest','Lats','Upper back','Traps','Front delts','Side delts','Rear delts','Biceps','Triceps','Quads','Hamstrings','Glutes','Calves','Abs'];
+    const MAJOR_MUSCLES = ['Chest','Lats','Upper back','Traps','Front delts','Side delts','Rear delts','Biceps','Triceps','Quads','Hamstrings','Glutes','Inner thighs','Lower back','Calves','Abs'];
     function majorMuscleForRaw(name) {
-      if (name === 'Pectoralis major' || name === 'Clavicular pectoralis major (upper chest)') return 'Chest';
+      if (name === 'Pectoralis major' || name === 'Clavicular pectoralis major (upper chest)' || name === 'Upper chest' || name === 'Lower chest') return 'Chest';
       if (name === 'Latissimus dorsi') return 'Lats';
       if (['Rhomboids','Middle trapezius','Mid/lower trapezius','Teres major','Upper back'].includes(name)) return 'Upper back';
       if (name === 'Upper trapezius') return 'Traps';
@@ -846,7 +860,9 @@
       if (name.startsWith('Triceps brachii')) return 'Triceps';
       if (name === 'Quadriceps') return 'Quads';
       if (name === 'Hamstrings') return 'Hamstrings';
-      if (name === 'Gluteus maximus') return 'Glutes';
+      if (name === 'Gluteus maximus' || name === 'Gluteus medius/minimus') return 'Glutes';
+      if (name === 'Adductors') return 'Inner thighs';
+      if (name === 'Spinal erectors') return 'Lower back';
       if (name === 'Gastrocnemius' || name === 'Soleus') return 'Calves';
       if (name === 'Rectus abdominis' || name === 'Obliques') return 'Abs';
       return null;
@@ -863,19 +879,39 @@
     const defaultData = {
       days: [
         { id: cryptoId(), name: 'Chest / Triceps', exercises: [
-          { id: cryptoId(), name: 'Bench Press', libraryId: 'bench_press' },
-          { id: cryptoId(), name: 'Incline Dumbbell Press', libraryId: 'incline_db_press' },
-          { id: cryptoId(), name: 'Triceps Pushdown', libraryId: 'pushdown' }
+          { id: cryptoId(), name: 'Incline Chest Press', libraryId: 'incline_machine_press', customMin: 6, customMax: 10, defaultSets: 3 },
+          { id: cryptoId(), name: 'Dumbbell Chest Press', libraryId: 'db_bench', customMin: 6, customMax: 10, defaultSets: 3 },
+          { id: cryptoId(), name: 'Decline Cable Fly', libraryId: 'decline_cable_fly', customMin: 10, customMax: 15, defaultSets: 2 },
+          { id: cryptoId(), name: 'Assisted Triceps Dips', libraryId: 'assisted_triceps_dip', customMin: 8, customMax: 12, defaultSets: 2 },
+          { id: cryptoId(), name: 'Overhead Cable Triceps Extension', libraryId: 'overhead_triceps', customMin: 8, customMax: 12, defaultSets: 3 },
+          { id: cryptoId(), name: 'Single-Arm Cable Pushdown', libraryId: 'single_arm_pushdown', customMin: 10, customMax: 15, defaultSets: 2 }
         ]},
         { id: cryptoId(), name: 'Back / Biceps', exercises: [
-          { id: cryptoId(), name: 'Lat Pulldown', libraryId: 'lat_pulldown' },
-          { id: cryptoId(), name: 'Seated Row', libraryId: 'seated_row' },
-          { id: cryptoId(), name: 'Dumbbell Curl', libraryId: 'db_curl' }
+          { id: cryptoId(), name: 'Assisted Pull-Ups', libraryId: 'assisted_pullup', customMin: 6, customMax: 10, defaultSets: 3 },
+          { id: cryptoId(), name: 'Close-Grip T-Bar Row', libraryId: 'close_grip_tbar_row', customMin: 6, customMax: 10, defaultSets: 3 },
+          { id: cryptoId(), name: 'Lat Pulldown', libraryId: 'lat_pulldown', customMin: 8, customMax: 12, defaultSets: 2 },
+          { id: cryptoId(), name: 'Rear Deltoid Machine Fly', libraryId: 'reverse_pec_deck', customMin: 10, customMax: 20, defaultSets: 3 },
+          { id: cryptoId(), name: 'Single-Arm Cable Lat Row', libraryId: 'single_arm_cable_lat_row', customMin: 10, customMax: 15, defaultSets: 2 },
+          { id: cryptoId(), name: 'Behind-the-Body Cable Curl', libraryId: 'bayesian_curl', customMin: 8, customMax: 12, defaultSets: 3 },
+          { id: cryptoId(), name: 'Rope Hammer Curl', libraryId: 'hammer_curl', customMin: 10, customMax: 15, defaultSets: 2 },
+          { id: cryptoId(), name: 'Weighted Lower Back Extensions', libraryId: 'weighted_lower_back_extension', customMin: 8, customMax: 15, defaultSets: 3 }
         ]},
         { id: cryptoId(), name: 'Legs', exercises: [
-          { id: cryptoId(), name: 'Squat', libraryId: 'back_squat' },
-          { id: cryptoId(), name: 'Leg Press', libraryId: 'leg_press' },
-          { id: cryptoId(), name: 'Seated Leg Curl', libraryId: 'seated_leg_curl' }
+          { id: cryptoId(), name: 'Squat', libraryId: 'back_squat', customMin: 5, customMax: 8, defaultSets: 3 },
+          { id: cryptoId(), name: 'Close-Stance Hack Squat', libraryId: 'close_stance_hack', customMin: 8, customMax: 12, defaultSets: 3 },
+          { id: cryptoId(), name: 'Lying Hamstring Curl Machine', libraryId: 'lying_leg_curl', customMin: 8, customMax: 12, defaultSets: 3 },
+          { id: cryptoId(), name: 'Leg Extension', libraryId: 'leg_extension', customMin: 10, customMax: 15, defaultSets: 3 },
+          { id: cryptoId(), name: 'Standing Calf Raise Machine', libraryId: 'standing_calf', customMin: 8, customMax: 15, defaultSets: 4 },
+          { id: cryptoId(), name: 'Inner Thigh Machine', libraryId: 'hip_adductor_machine', customMin: 10, customMax: 15, defaultSets: 2 },
+          { id: cryptoId(), name: 'Outer Thigh Machine', libraryId: 'hip_abductor_machine', customMin: 10, customMax: 15, defaultSets: 2 }
+        ]},
+        { id: cryptoId(), name: 'Shoulders / Abs', exercises: [
+          { id: cryptoId(), name: 'Machine Shoulder Press', libraryId: 'machine_shoulder_press', customMin: 6, customMax: 10, defaultSets: 3 },
+          { id: cryptoId(), name: 'Single-Arm Cable Lateral Raise', libraryId: 'cable_lateral_raise', customMin: 10, customMax: 15, defaultSets: 3 },
+          { id: cryptoId(), name: 'Dumbbell Lateral Raise', libraryId: 'db_lateral_raise', customMin: 12, customMax: 20, defaultSets: 2 },
+          { id: cryptoId(), name: 'Rear-Delt Cable Fly', libraryId: 'rear_delt_cable', customMin: 12, customMax: 20, defaultSets: 2 },
+          { id: cryptoId(), name: 'Cable Crunch', libraryId: 'cable_crunch', customMin: 8, customMax: 15, defaultSets: 3 },
+          { id: cryptoId(), name: 'Hanging Leg Raise', libraryId: 'hanging_leg_raise', customMin: 8, customMax: 15, defaultSets: 3 }
         ]}
       ],
       logs: {},
@@ -912,8 +948,30 @@
       return EXERCISE_LIBRARY.find(item => normalizeName(item.name) === n || (item.aliases || []).some(a => normalizeName(a) === n)) || null;
     }
 
+    function isUntouchedLegacyStarter(d) {
+      if (!d || !Array.isArray(d.days) || d.days.length !== 3) return false;
+      const expected = [
+        ['Chest / Triceps',['bench_press','incline_db_press','pushdown']],
+        ['Back / Biceps',['lat_pulldown','seated_row','db_curl']],
+        ['Legs',['back_squat','leg_press','seated_leg_curl']]
+      ];
+      const shapeMatches = expected.every((entry, i) => {
+        const day = d.days[i];
+        return day && day.name === entry[0] && Array.isArray(day.exercises) &&
+          day.exercises.map(ex => ex.libraryId || (matchLibrary(ex.name) || {}).id).join('|') === entry[1].join('|');
+      });
+      if (!shapeMatches) return false;
+      const hasHistory = d.history && Object.values(d.history).some(day => day && Object.keys(day).length);
+      if (hasHistory) return false;
+      const hasEnteredSet = d.logs && Object.values(d.logs).some(dayLog => dayLog && Object.values(dayLog).some(sets =>
+        Array.isArray(sets) && sets.some(s => String(s?.weight ?? '').trim() !== '' || String(s?.reps ?? '').trim() !== '')
+      ));
+      return !hasEnteredSet;
+    }
+
     function migrateData(raw) {
-      const d = raw && typeof raw === 'object' ? raw : structuredCloneSafe(defaultData);
+      let d = raw && typeof raw === 'object' ? raw : structuredCloneSafe(defaultData);
+      if (isUntouchedLegacyStarter(d)) d = structuredCloneSafe(defaultData);
       if (!Array.isArray(d.days)) d.days = [];
       if (!d.logs || typeof d.logs !== 'object') d.logs = {};
       if (!d.history || typeof d.history !== 'object') d.history = {};
@@ -939,6 +997,7 @@
           }
           if (typeof ex.customMin !== 'number') ex.customMin = null;
           if (typeof ex.customMax !== 'number') ex.customMax = null;
+          if (!Number.isInteger(ex.defaultSets) || ex.defaultSets < 1) ex.defaultSets = 1;
         });
       });
       return d;
@@ -964,7 +1023,8 @@
       let min = Number.isFinite(ex.customMin) && ex.customMin > 0 ? ex.customMin : (lib ? lib.min : 6);
       let max = Number.isFinite(ex.customMax) && ex.customMax >= min ? ex.customMax : (lib ? lib.max : 12);
       const increment = Number.isFinite(ex.increment) && ex.increment >= 0 ? ex.increment : (lib ? lib.increment : 2.5);
-      return { min, max, increment, lib };
+      const loadType = lib && lib.loadType === 'assistance' ? 'assistance' : 'weight';
+      return { min, max, increment, loadType, lib };
     }
 
     function dayLog(dayId) {
@@ -974,7 +1034,12 @@
 
     function exerciseSets(dayId, exerciseId) {
       const log = dayLog(dayId);
-      if (!log[exerciseId]) log[exerciseId] = [{ weight: '', reps: '', failure: false, dropset: false }];
+      if (!log[exerciseId]) {
+        const day = data.days.find(d => d.id === dayId);
+        const ex = day?.exercises?.find(e => e.id === exerciseId);
+        const count = Math.max(1, Number.isInteger(ex?.defaultSets) ? ex.defaultSets : 1);
+        log[exerciseId] = Array.from({length: count}, () => ({ weight: '', reps: '', failure: false, dropset: false }));
+      }
       return log[exerciseId];
     }
 
@@ -1047,6 +1112,13 @@
     }
 
     function openStrengthChart(day, ex) {
+      const cfg = exerciseConfig(ex);
+      if (cfg.loadType === 'assistance') {
+        document.getElementById('strengthTitle').textContent = `${ex.name} progress`;
+        document.getElementById('strengthContent').innerHTML = '<div class="empty">Assisted exercise progression is handled by the coach algorithm using less assistance = harder. The e1RM strength chart is hidden here because assistance kilograms are not external load and would give a misleading strength number.</div>';
+        document.getElementById('strengthBackdrop').classList.add('open');
+        return;
+      }
       const points = strengthHistory(day.id, ex.id);
       document.getElementById('strengthTitle').textContent = `${ex.name} strength`;
       const content = document.getElementById('strengthContent');
@@ -1219,6 +1291,7 @@
       if (!p) return null;
       const {cfg, reps, weights, sameWeight, workingWeight, earlyFailures, allAtTop} = p;
       const inc = cfg.increment;
+      const isAssistance = cfg.loadType === 'assistance';
 
       const priorPatterns = history.slice(0, -1).map(s => straightSessionPattern(ex, s)).filter(Boolean);
       const comparable = priorPatterns.filter(q => sameWorkingWeight(p, q) && q.reps.length === p.reps.length).slice(-3);
@@ -1234,7 +1307,7 @@
       if (!sameWeight) {
         const targets = mixedLoadTarget(p);
         const descending = weights.every((w,i) => i === 0 || w <= weights[i-1] + 0.001);
-        const pieces = weights.map((w,i) => `${formatWeight(w)}×${targets[i]}`);
+        const pieces = weights.map((w,i) => `${formatWeight(w)}${isAssistance ? 'kg assist ' : 'kg '}×${targets[i]}`);
         return {
           kind:'hold', weight:null, reps:targets, title:'Keep your set weights',
           main: pieces.join(' · '),
@@ -1245,33 +1318,33 @@
       // A clear poor pattern with no contradictory history can justify one load step down. If the same
       // weight was fine last time, treat the new result as a likely off-day first and repeat the load.
       if (currentPoor && inc > 0 && !clearOneOffDip && (repeatedPoor || comparable.length === 0 || (recentMedian !== null && p.totalReps <= recentMedian - Math.max(2, reps.length)))) {
-        const newWeight = Math.max(0, roundToStep(workingWeight - inc, inc));
+        const newWeight = Math.max(0, roundToStep(workingWeight + (isAssistance ? inc : -inc), inc));
         const targets = resetTargets(reps.length, cfg.min, cfg.max);
         let reason = p.severeCollapse ? `Reps collapsed from ${p.first} to ${p.last}.` : (p.firstTooHeavy ? 'Your first working set was below range and reached failure.' : 'Too many working sets were below the target range.');
         if (repeatedPoor) reason += ' This has now happened in consecutive comparable sessions.';
         return {
-          kind:'reduce', weight:newWeight, reps:targets, title:'Reduce load next time',
-          main:`${formatWeight(newWeight)} kg × ${targets.join(', ')} reps`,
-          note:`${reason} Drop one configured weight step and rebuild. ${confidence}.`
+          kind:'reduce', weight:newWeight, reps:targets, title:isAssistance ? 'Add assistance next time' : 'Reduce load next time',
+          main:`${formatWeight(newWeight)} kg${isAssistance ? ' assist' : ''} × ${targets.join(', ')} reps`,
+          note:`${reason} ${isAssistance ? 'Add one assistance step and rebuild, then reduce assistance again once performance is back in range.' : 'Drop one configured weight step and rebuild.'} ${confidence}.`
         };
       }
 
       if (clearOneOffDip) {
         const targets = mostRecentComparable.reps.map(r => Math.min(r, cfg.max));
         return {
-          kind:'hold', weight:workingWeight, reps:targets, title:'Repeat the weight',
-          main:`${formatWeight(workingWeight)} kg × ${targets.join(', ')} reps`,
-          note:`This session was clearly worse than your previous comparable one, so don't cut the load from one bad day. Aim to return to your prior performance, take full rest, and reassess next session. ${confidence}.`
+          kind:'hold', weight:workingWeight, reps:targets, title:isAssistance ? 'Repeat the assistance' : 'Repeat the weight',
+          main:`${formatWeight(workingWeight)} kg${isAssistance ? ' assist' : ''} × ${targets.join(', ')} reps`,
+          note:`This session was clearly worse than your previous comparable one, so ${isAssistance ? "don't change the assistance from one bad day" : "don't cut the load from one bad day"}. Aim to return to your prior performance, take full rest, and reassess next session. ${confidence}.`
         };
       }
 
       if (allAtTop && inc > 0) {
-        const newWeight = roundToStep(workingWeight + inc, inc);
+        const newWeight = Math.max(0, roundToStep(workingWeight + (isAssistance ? -inc : inc), inc));
         const targets = resetTargets(reps.length, cfg.min, cfg.max);
         return {
-          kind:'increase', weight:newWeight, reps:targets, title:'Add weight next time',
-          main:`${formatWeight(newWeight)} kg × ${targets.join(', ')} reps`,
-          note:`Every straight set reached the top of the ${cfg.min}–${cfg.max} range. Increase by one configured weight step and rebuild within the range. ${confidence}.`
+          kind:'increase', weight:newWeight, reps:targets, title:isAssistance ? 'Reduce assistance next time' : 'Add weight next time',
+          main:`${formatWeight(newWeight)} kg${isAssistance ? ' assist' : ''} × ${targets.join(', ')} reps`,
+          note:`Every straight set reached the top of the ${cfg.min}–${cfg.max} range. ${isAssistance ? 'Reduce assistance by one configured step' : 'Increase by one configured weight step'} and rebuild within the range. ${confidence}.`
         };
       }
 
@@ -1282,15 +1355,15 @@
       const targets = nextBalancedTarget(p);
       let note;
       if (earlyFailures > 0) {
-        note = `Keep the load and repeat these reps, but avoid failure on the early sets; use enough rest and save failure for the final set if you want it.`;
+        note = `${isAssistance ? 'Keep the same assistance' : 'Keep the load'} and repeat these reps, but avoid failure on the early sets; use enough rest and save failure for the final set if you want it.`;
       } else {
-        note = `Keep the load and add one total rep while staying in the ${cfg.min}–${cfg.max} working range.`;
+        note = `${isAssistance ? 'Keep the same assistance' : 'Keep the load'} and add one total rep while staying in the ${cfg.min}–${cfg.max} working range.`;
       }
       if (stalledThree) note += ' You have been essentially flat for three comparable sessions; prioritise full rest and clean execution before changing the load.';
       note += ` ${confidence}.`;
       return {
-        kind:'hold', weight:workingWeight, reps:targets, title: earlyFailures ? 'Repeat cleanly' : 'Keep the weight',
-        main:`${formatWeight(workingWeight)} kg × ${targets.join(', ')} reps`, note
+        kind:'hold', weight:workingWeight, reps:targets, title: earlyFailures ? 'Repeat cleanly' : (isAssistance ? 'Keep the assistance' : 'Keep the weight'),
+        main:`${formatWeight(workingWeight)} kg${isAssistance ? ' assist' : ''} × ${targets.join(', ')} reps`, note
       };
     }
 
@@ -2090,7 +2163,7 @@
         </div>
         <div class="suggestion-slot"></div>
         <div class="last-session-slot"></div>
-        <table class="set-table"><thead><tr><th class="set-number">Set</th><th>Weight</th><th>Reps</th><th class="flags-col">F / DS</th></tr></thead><tbody></tbody></table>
+        <table class="set-table"><thead><tr><th class="set-number">Set</th><th>${cfg.loadType === 'assistance' ? 'Assist' : 'Weight'}</th><th>Reps</th><th class="flags-col">F / DS</th></tr></thead><tbody></tbody></table>
         <div class="exercise-footer"><button class="add-set-btn">+ Set</button><button class="remove-set-btn">Remove last</button></div>
       `;
       card.querySelector('.exercise-title').textContent = ex.name;
@@ -2134,7 +2207,7 @@
           const row = document.createElement('tr');
           row.innerHTML = `
             <td class="set-number">${index + 1}</td>
-            <td><input class="set-input weight-input" inputmode="decimal" placeholder="kg" aria-label="Weight for set ${index + 1}"></td>
+            <td><input class="set-input weight-input" inputmode="decimal" placeholder="${cfg.loadType === 'assistance' ? 'assist kg' : 'kg'}" aria-label="${cfg.loadType === 'assistance' ? 'Assistance' : 'Weight'} for set ${index + 1}"></td>
             <td><input class="set-input reps-input" inputmode="numeric" placeholder="reps" aria-label="Reps for set ${index + 1}"></td>
             <td><div class="set-flags"><button class="flag-btn failure-btn ${set.failure ? 'active' : ''}" aria-label="Toggle failure for set ${index + 1}">F</button><button class="flag-btn dropset-btn ${set.dropset ? 'active' : ''}" aria-label="Toggle drop set for set ${index + 1}">DS</button></div></td>`;
           const weight = row.querySelector('.weight-input');

@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#f7f1e5" />
+  <title>Gym Tracker</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --card: #ffffff;
+      --text: #171717;
+      --muted: #757575;
+      --line: #dedede;
+      --accent: #171717;
+      --soft: #f0f0f2;
+      --danger: #b42318;
+      --good: #166534;
+      --good-bg: #f0fdf4;
+      --warn-bg: #fff8e7;
+      --warn: #8a5a00;
+      --radius: 16px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .app { width: min(100%, 720px); margin: 0 auto; min-height: 100vh; padding: 24px 16px calc(96px + var(--safe-bottom)); }
+    .header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+    .header h1 { font-size: 28px; line-height: 1.1; margin: 0; font-weight: 750; letter-spacing: -0.5px; }
+    .back-btn { border: 0; background: transparent; width: 40px; height: 40px; padding: 0; border-radius: 12px; font-size: 27px; cursor: pointer; }
+    .subtitle { color: var(--muted); margin: 5px 0 0; font-size: 14px; }
+
+    .day-list { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .day-btn { width: 100%; min-height: 72px; border: 1px solid var(--line); background: var(--card); border-radius: var(--radius); padding: 18px; text-align: left; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.035); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .day-btn:active { transform: scale(.995); }
+    .day-name { font-size: 18px; font-weight: 700; }
+    .day-count { font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+    .exercise-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
+    .exercise-head { padding: 14px 14px 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .exercise-title { font-weight: 750; font-size: 16px; }
+    .exercise-meta { color: var(--muted); font-size: 12px; margin-top: 4px; line-height: 1.35; }
+    .info-btn { border: 1px solid var(--line); background: #fafafa; color: var(--text); width: 32px; height: 32px; border-radius: 10px; font-weight: 750; cursor: pointer; flex: 0 0 auto; }
+
+    .suggestion { margin: 0 12px 12px; border-radius: 12px; padding: 10px 11px; border: 1px solid #d9e6dc; background: var(--good-bg); }
+    .suggestion.warn { background: var(--warn-bg); border-color: #f0dfad; }
+    .suggestion-title { font-size: 11px; text-transform: uppercase; letter-spacing: .35px; font-weight: 800; color: var(--good); margin-bottom: 4px; }
+    .suggestion.warn .suggestion-title { color: var(--warn); }
+    .suggestion-main { font-size: 14px; font-weight: 750; line-height: 1.35; }
+    .suggestion-note { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+
+    .last-session { margin: -2px 12px 10px; display: flex; align-items: center; gap: 7px; min-width: 0; }
+    .last-session-label { flex: 0 0 auto; color: var(--muted); font-size: 10px; font-weight: 750; white-space: nowrap; }
+    .last-session-sets { display: flex; gap: 5px; min-width: 0; overflow-x: auto; scrollbar-width: none; padding: 1px 0; }
+    .last-session-sets::-webkit-scrollbar { display: none; }
+    .last-set-chip { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px; min-height: 25px; padding: 3px 7px; border: 1px solid var(--line); border-radius: 8px; background: #fafafa; font-size: 11px; color: #555; white-space: nowrap; }
+    .last-set-number { color: var(--muted); font-size: 9px; font-weight: 800; }
+    .last-set-value { font-weight: 700; color: var(--text); }
+    .last-mini-flag { font-size: 8px; font-weight: 850; color: var(--muted); }
+    .last-mini-flag.failure { color: var(--accent); }
+    .last-mini-flag.dropset { color: #555; }
+
+    .set-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .set-table th, .set-table td { border-top: 1px solid var(--line); padding: 8px 6px; text-align: center; vertical-align: middle; }
+    .set-table th { color: var(--muted); font-size: 11px; font-weight: 650; background: #fafafa; text-transform: uppercase; letter-spacing: .3px; }
+    .set-number { width: 44px; color: var(--muted); font-size: 14px; }
+    .flags-col { width: 118px; }
+    .set-input { width: 100%; min-width: 0; height: 39px; border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 7px 8px; text-align: center; outline: none; font-size: 16px; }
+    .set-input:focus { border-color: #8c8c8c; }
+    .set-flags { display: flex; justify-content: center; gap: 5px; }
+    .flag-btn { width: 42px; height: 36px; border-radius: 10px; border: 1px solid var(--line); background: white; color: var(--muted); font-size: 11px; font-weight: 800; cursor: pointer; padding: 0; }
+    .flag-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+    .dropset-btn.active { background: #555; border-color: #555; }
+    .exercise-footer { display: flex; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid var(--line); }
+    .add-set-btn { border: 1px solid var(--line); background: #fafafa; border-radius: 11px; padding: 9px 12px; font-weight: 700; cursor: pointer; }
+    .remove-set-btn { border: 0; background: transparent; color: var(--muted); border-radius: 10px; padding: 9px 10px; cursor: pointer; }
+
+    .finish-btn { width: 100%; border: 0; background: var(--accent); color: white; border-radius: 14px; min-height: 50px; font-weight: 800; margin: 4px 0 16px; cursor: pointer; }
+    .finish-note { text-align: center; color: var(--muted); font-size: 12px; margin: -6px 8px 16px; }
+
+    .settings-fab { position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: calc(16px + var(--safe-bottom)); width: 48px; height: 48px; border-radius: 15px; border: 1px solid var(--line); background: rgba(255,255,255,.94); backdrop-filter: blur(8px); font-size: 23px; cursor: pointer; box-shadow: 0 4px 18px rgba(0,0,0,.08); z-index: 20; }
+    .library-fab { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: calc(16px + var(--safe-bottom)); height: 48px; border-radius: 15px; border: 1px solid var(--line); background: rgba(255,255,255,.94); backdrop-filter: blur(8px); padding: 0 14px; font-weight: 750; cursor: pointer; box-shadow: 0 4px 18px rgba(0,0,0,.08); z-index: 20; }
+
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.28); display: none; align-items: flex-end; justify-content: center; z-index: 50; }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: min(100%, 720px); max-height: 88vh; overflow: auto; background: var(--bg); border-radius: 24px 24px 0 0; padding: 18px 16px calc(24px + var(--safe-bottom)); box-shadow: 0 -8px 30px rgba(0,0,0,.16); }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .modal h2 { margin: 0; font-size: 22px; }
+    .close-btn { border: 1px solid var(--line); background: white; width: 38px; height: 38px; border-radius: 12px; font-size: 20px; cursor: pointer; }
+
+    .settings-card { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin-bottom: 12px; }
+    .settings-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .settings-row:last-child { margin-bottom: 0; }
+    .settings-input { flex: 1; min-width: 0; height: 42px; border: 1px solid var(--line); border-radius: 11px; padding: 8px 10px; font-size: 16px; outline: none; }
+    .settings-number { width: 82px; flex: 0 0 82px; }
+    .small-btn, .primary-btn, .danger-btn { border-radius: 11px; min-height: 40px; padding: 8px 12px; cursor: pointer; font-weight: 700; }
+    .small-btn { border: 1px solid var(--line); background: #fafafa; }
+    .primary-btn { width: 100%; border: 0; background: var(--accent); color: white; margin-top: 4px; }
+    .danger-btn { border: 1px solid #f0c7c2; color: var(--danger); background: #fff7f6; }
+    .exercise-settings { margin-left: 12px; padding-left: 12px; border-left: 2px solid #ededed; margin-top: 8px; }
+    .section-label { color: var(--muted); font-size: 12px; font-weight: 700; margin: 10px 0 7px; text-transform: uppercase; letter-spacing: .35px; }
+    .empty { background: white; border: 1px dashed #cfcfcf; border-radius: var(--radius); text-align: center; color: var(--muted); padding: 30px 18px; }
+
+    .library-search { width: 100%; height: 44px; border: 1px solid var(--line); border-radius: 12px; background: white; padding: 9px 12px; font-size: 16px; margin-bottom: 12px; outline: none; }
+    .library-list { display: grid; gap: 8px; }
+    .library-item { border: 1px solid var(--line); background: white; border-radius: 13px; padding: 12px; cursor: pointer; text-align: left; }
+    .library-item-name { font-weight: 750; font-size: 15px; }
+    .library-item-meta { color: var(--muted); font-size: 12px; margin-top: 3px; line-height: 1.35; }
+    .detail-card { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+    .detail-label { color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .35px; margin-bottom: 4px; }
+    .detail-value { font-size: 15px; line-height: 1.4; }
+    .evidence-note { color: var(--muted); font-size: 12px; line-height: 1.45; margin-top: 8px; }
+
+    .exercise-actions { display: flex; gap: 6px; flex: 0 0 auto; }
+    .chart-btn { border: 1px solid var(--line); background: #fafafa; color: var(--text); height: 32px; border-radius: 10px; font-weight: 750; cursor: pointer; padding: 0 9px; font-size: 12px; }
+    .strength-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .strength-stat { background: white; border: 1px solid var(--line); border-radius: 13px; padding: 10px; min-width: 0; }
+    .strength-stat-label { color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px; margin-bottom: 4px; }
+    .strength-stat-value { font-size: 18px; font-weight: 800; line-height: 1.15; }
+    .strength-stat-sub { color: var(--muted); font-size: 11px; margin-top: 3px; }
+    .strength-positive { color: var(--good); }
+    .strength-negative { color: var(--danger); }
+    .chart-card { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; overflow: hidden; }
+    .chart-wrap { width: 100%; overflow: hidden; }
+    .strength-svg { width: 100%; height: auto; display: block; }
+    .chart-grid { stroke: #e8e8e8; stroke-width: 1; }
+    .chart-axis-text { fill: #777; font-size: 11px; }
+    .chart-line { fill: none; stroke: #171717; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .chart-dot { fill: #fff; stroke: #171717; stroke-width: 2.5; }
+    .chart-dot.latest { fill: #171717; }
+    .chart-note { color: var(--muted); font-size: 12px; line-height: 1.45; margin-top: 10px; }
+    .history-mini { margin-top: 10px; display: grid; gap: 6px; }
+    .history-row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; border-top: 1px solid #ededed; padding-top: 7px; }
+    .history-row span:last-child { font-weight: 700; text-align: right; }
+
+    .home-header { justify-content: space-between; }
+    .home-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+    .home-icon-btn, .volume-icon-btn { flex: 0 0 auto; width: 42px; height: 42px; border: 1px solid var(--line); background: var(--card); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); padding: 0; box-shadow: 0 1px 2px rgba(0,0,0,.035); }
+    .home-icon-btn svg, .volume-icon-btn svg { width: 21px; height: 21px; display: block; }
+    .quote-stage { min-height: 230px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 28px 18px 24px; border: 1px solid var(--line); background: white; border-radius: var(--radius); }
+    .quote-text { margin: 0; max-width: 520px; font-size: clamp(24px, 7vw, 38px); line-height: 1.08; font-weight: 850; letter-spacing: -1px; }
+    .quote-controls { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 10px; }
+    .quote-hint { color: var(--muted); font-size: 11px; line-height: 1.4; text-align: center; margin-top: 9px; padding: 0 10px; }
+
+    .home-quote { margin: 2px 2px 24px; padding: 10px 4px 2px; text-align: left; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+    .home-quote-text { margin: 0; max-width: 650px; font-size: clamp(27px, 7.5vw, 42px); line-height: 1.03; font-weight: 860; letter-spacing: -1.25px; text-wrap: balance; }
+    .home-quote-hint { margin-top: 9px; color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .75px; }
+    .home-quote:active .home-quote-text { opacity: .7; }
+    .week-nav { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .week-nav-btn { width: 40px; height: 38px; border: 1px solid var(--line); background: white; border-radius: 11px; cursor: pointer; font-size: 20px; }
+    .week-nav-btn:disabled { opacity: .3; cursor: default; }
+    .week-label { text-align: center; min-width: 0; }
+    .week-label-main { font-size: 14px; font-weight: 800; }
+    .week-label-sub { color: var(--muted); font-size: 11px; margin-top: 2px; }
+    .volume-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .volume-card { background: white; border: 1px solid var(--line); border-radius: 13px; padding: 11px 12px; min-width: 0; }
+    .volume-muscle { color: var(--muted); font-size: 11px; font-weight: 750; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .volume-value { font-size: 24px; font-weight: 800; letter-spacing: -.4px; margin-top: 3px; line-height: 1; }
+    .volume-unit { color: var(--muted); font-size: 10px; font-weight: 650; margin-left: 3px; }
+    .volume-bar { height: 5px; border-radius: 999px; background: #ededed; overflow: hidden; margin-top: 9px; }
+    .volume-bar-fill { height: 100%; border-radius: inherit; background: var(--accent); }
+    .volume-note { color: var(--muted); font-size: 11px; line-height: 1.4; margin-top: 11px; padding: 0 2px; }
+
+    .picker-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+
+    @media (min-width: 600px) { .day-list { grid-template-columns: repeat(2, 1fr); } }
+  
+
+    /* V11 — minimal notepad theme */
+    :root {
+      --bg: #e9e3d8;
+      --paper: #fbf7ed;
+      --card: rgba(251, 247, 237, .90);
+      --text: #24221f;
+      --muted: #777168;
+      --line: #d8d0c2;
+      --rule: rgba(113, 151, 184, .17);
+      --margin-line: rgba(191, 92, 80, .28);
+      --accent: #25231f;
+      --soft: rgba(50, 47, 42, .045);
+      --good-bg: rgba(78, 120, 85, .07);
+      --warn-bg: rgba(170, 123, 44, .08);
+      --radius: 6px;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    }
+
+    body { background-image: none; }
+
+    .app {
+      position: relative;
+      background-color: var(--paper);
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 31px,
+        var(--rule) 31px,
+        var(--rule) 32px
+      );
+      border-left: 1px solid #d7d0c4;
+      border-right: 1px solid #d7d0c4;
+      padding: 27px 18px calc(94px + var(--safe-bottom)) 30px;
+      box-shadow: none;
+    }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 18px;
+      width: 1px;
+      background: var(--margin-line);
+      pointer-events: none;
+    }
+
+    .header { margin-bottom: 20px; }
+    .header h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -.6px;
+    }
+    .subtitle { font-size: 12px; letter-spacing: .15px; }
+
+    .back-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 3px;
+      font-size: 24px;
+    }
+
+    .home-icon-btn, .volume-icon-btn,
+    .settings-fab, .library-fab {
+      background: rgba(251,247,237,.96);
+      border: 1px solid #cfc6b7;
+      border-radius: 5px;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .settings-fab, .library-fab { height: 44px; }
+    .settings-fab { width: 44px; }
+
+    .home-quote {
+      margin: 0 0 25px;
+      padding: 8px 4px 11px;
+      border-bottom: 2px solid rgba(36,34,31,.78);
+    }
+    .home-quote-text {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(28px, 7.5vw, 43px);
+      font-weight: 700;
+      line-height: 1.04;
+      letter-spacing: -1px;
+    }
+    .home-quote-hint {
+      margin-top: 8px;
+      color: #8d857a;
+      font-size: 9px;
+      letter-spacing: 1px;
+    }
+
+    .day-list { gap: 0; }
+    .day-btn {
+      min-height: 62px;
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid #bdb4a6;
+      border-radius: 0;
+      padding: 14px 5px 12px;
+      box-shadow: none;
+    }
+    .day-btn:first-child { border-top: 1px solid #bdb4a6; }
+    .day-name {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 19px;
+      font-weight: 700;
+    }
+    .day-count { font-size: 11px; }
+
+    .exercise-card {
+      background: rgba(251,247,237,.72);
+      border: 0;
+      border-top: 1px solid #aaa193;
+      border-bottom: 1px solid #aaa193;
+      border-radius: 0;
+      margin-bottom: 19px;
+      box-shadow: none;
+      overflow: visible;
+    }
+    .exercise-head { padding: 12px 4px 8px; }
+    .exercise-title {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .exercise-meta { font-size: 11px; }
+    .exercise-actions { gap: 4px; }
+    .info-btn, .chart-btn {
+      background: transparent;
+      border: 1px solid #c9c0b2;
+      border-radius: 4px;
+      height: 30px;
+      box-shadow: none;
+    }
+    .info-btn { width: 30px; }
+
+    .suggestion {
+      margin: 0 4px 10px;
+      padding: 8px 9px;
+      border-radius: 3px;
+      border: 0;
+      border-left: 2px solid rgba(55,101,62,.55);
+      background: var(--good-bg);
+    }
+    .suggestion.warn {
+      border-color: rgba(150,101,25,.55);
+      background: var(--warn-bg);
+    }
+    .suggestion-title { font-size: 9px; letter-spacing: .65px; }
+    .suggestion-main { font-size: 13px; }
+    .suggestion-note { font-size: 11px; }
+
+    .last-session { margin: 0 4px 8px; }
+    .last-session-label { font-size: 9px; }
+    .last-set-chip {
+      min-height: 22px;
+      padding: 2px 5px;
+      border: 0;
+      border-bottom: 1px solid #c7beaf;
+      border-radius: 0;
+      background: transparent;
+      font-size: 10px;
+    }
+
+    .set-table { background: rgba(251,247,237,.46); }
+    .set-table th, .set-table td {
+      border-top: 1px solid #d8d0c2;
+      padding: 7px 5px;
+    }
+    .set-table th {
+      background: transparent;
+      color: #81796e;
+      font-size: 9px;
+      letter-spacing: .7px;
+    }
+    .set-number { font-family: Georgia, serif; }
+    .set-input {
+      height: 35px;
+      border: 0;
+      border-bottom: 1px solid #91887b;
+      border-radius: 0;
+      background: transparent;
+      padding: 4px 5px 2px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 17px;
+    }
+    .set-input:focus {
+      border-color: var(--accent);
+      background: rgba(255,255,255,.28);
+    }
+    .flag-btn {
+      width: 38px;
+      height: 32px;
+      border-radius: 4px;
+      border: 1px solid #bfb6a8;
+      background: transparent;
+      color: #6f685f;
+      font-size: 10px;
+    }
+    .flag-btn.active { background: var(--accent); color: var(--paper); }
+    .dropset-btn.active { background: #696258; border-color: #696258; }
+
+    .exercise-footer {
+      padding: 8px 4px 10px;
+      border-top: 1px solid #d8d0c2;
+    }
+    .add-set-btn, .remove-set-btn {
+      border-radius: 3px;
+      background: transparent;
+      font-size: 12px;
+    }
+    .add-set-btn { border: 1px solid #bfb6a8; }
+
+    .finish-btn {
+      min-height: 46px;
+      border-radius: 3px;
+      background: var(--accent);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 16px;
+      letter-spacing: .2px;
+    }
+
+    .modal-backdrop { background: rgba(42,38,33,.34); }
+    .modal {
+      background-color: var(--paper);
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 31px,
+        var(--rule) 31px,
+        var(--rule) 32px
+      );
+      border-radius: 8px 8px 0 0;
+      box-shadow: 0 -3px 18px rgba(46,40,34,.14);
+    }
+    .modal h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 700;
+    }
+    .close-btn, .week-nav-btn {
+      border-radius: 4px;
+      background: rgba(251,247,237,.9);
+      border-color: #c4baab;
+    }
+
+    .settings-card, .library-item, .detail-card,
+    .strength-stat, .chart-card, .volume-card, .empty {
+      background: rgba(251,247,237,.80);
+      border: 1px solid #cfc6b7;
+      border-radius: 4px;
+      box-shadow: none;
+    }
+
+    .settings-input, .library-search {
+      border: 0;
+      border-bottom: 1px solid #91887b;
+      border-radius: 0;
+      background: rgba(255,255,255,.18);
+    }
+    .small-btn, .primary-btn, .danger-btn {
+      border-radius: 3px;
+      box-shadow: none;
+    }
+    .small-btn { background: transparent; border-color: #bfb6a8; }
+    .primary-btn { background: var(--accent); }
+    .danger-btn { background: rgba(180,35,24,.035); }
+
+    .library-list { gap: 6px; }
+    .library-item { border-left: 3px solid #bcb3a5; }
+    .library-item-name { font-family: Georgia, "Times New Roman", serif; }
+
+    .strength-stat-value, .volume-value {
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    .chart-grid { stroke: #d8d0c2; }
+    .chart-line { stroke: #302d29; stroke-width: 2.25; }
+    .chart-dot { fill: var(--paper); stroke: #302d29; }
+    .chart-dot.latest { fill: #302d29; }
+    .volume-bar { background: #ddd4c7; border-radius: 1px; }
+    .volume-bar-fill { border-radius: 1px; background: #302d29; }
+
+    .quote-stage {
+      min-height: 210px;
+      background: rgba(251,247,237,.54);
+      border: 0;
+      border-top: 1px solid #aaa193;
+      border-bottom: 1px solid #aaa193;
+      border-radius: 0;
+    }
+    .quote-text {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 700;
+    }
+
+    @media (min-width: 600px) {
+      .day-list { grid-template-columns: 1fr; }
+    }
+
+
+    /* V12 — habits */
+    .habit-home-grid {
+      display: grid;
+      grid-template-columns: repeat(15, minmax(0, 1fr));
+      gap: 4px;
+      margin: -8px 2px 23px;
+      padding: 0 2px 15px;
+      border-bottom: 1px solid #bdb4a6;
+    }
+    .habit-day-square {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 100%;
+      aspect-ratio: 1;
+      min-width: 0;
+      padding: 0;
+      border: 1px solid rgba(79,73,65,.16);
+      border-radius: 2px;
+      cursor: pointer;
+      background: rgba(46,74,52,.04);
+    }
+    .habit-day-square.level-0 { background: rgba(46,74,52,.035); }
+    .habit-day-square.level-1 { background: rgba(46,74,52,.20); }
+    .habit-day-square.level-2 { background: rgba(46,74,52,.38); }
+    .habit-day-square.level-3 { background: rgba(46,74,52,.59); }
+    .habit-day-square.level-4 { background: rgba(46,74,52,.84); }
+    .habit-day-square.no-habits { background: rgba(36,34,31,.035); border-style: dashed; }
+    .habit-day-square.today { outline: 1px solid rgba(36,34,31,.78); outline-offset: 2px; }
+    .habit-day-square:active { transform: scale(.92); }
+
+    .habit-date-nav {
+      display: grid;
+      grid-template-columns: 38px 1fr 38px;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 13px;
+    }
+    .habit-date-btn {
+      width: 38px;
+      height: 36px;
+      border: 1px solid #c4baab;
+      border-radius: 4px;
+      background: rgba(251,247,237,.85);
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .habit-date-btn:disabled { opacity: .28; cursor: default; }
+    .habit-date-label { text-align: center; }
+    .habit-date-main { font-family: Georgia, "Times New Roman", serif; font-weight: 700; font-size: 16px; }
+    .habit-date-sub { color: var(--muted); font-size: 10px; margin-top: 2px; }
+    .habit-progress-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 7px 1px 9px;
+      border-bottom: 1px solid #bdb4a6;
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .habit-progress-line strong { color: var(--text); font-size: 12px; }
+    .habit-checklist { display: grid; gap: 0; margin: 4px 0 16px; }
+    .habit-check-row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-height: 51px;
+      border-bottom: 1px solid #cfc6b7;
+      padding: 7px 2px;
+      cursor: pointer;
+    }
+    .habit-check-row input {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      flex: 0 0 22px;
+      border: 1.5px solid #756e64;
+      border-radius: 2px;
+      background: transparent;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .habit-check-row input:checked { background: #2e4a34; border-color: #2e4a34; }
+    .habit-check-row input:checked::after { content: "✓"; color: var(--paper); font-size: 15px; font-weight: 800; line-height: 1; }
+    .habit-check-name { font-family: Georgia, "Times New Roman", serif; font-size: 17px; }
+    .habit-check-row.done .habit-check-name { text-decoration: line-through; color: var(--muted); }
+    .habit-empty { color: var(--muted); font-size: 13px; padding: 18px 2px; border-bottom: 1px solid #cfc6b7; }
+    .habit-manage-toggle { width: 100%; margin-top: 4px; }
+    .habit-manage { display: none; margin-top: 12px; padding-top: 7px; border-top: 1px solid #bdb4a6; }
+    .habit-manage.open { display: block; }
+    .habit-edit-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .habit-edit-input {
+      min-width: 0;
+      height: 39px;
+      border: 0;
+      border-bottom: 1px solid #91887b;
+      background: rgba(255,255,255,.16);
+      padding: 6px 4px;
+      font-size: 15px;
+      outline: none;
+    }
+    .habit-delete-btn {
+      height: 36px;
+      border: 0;
+      background: transparent;
+      color: var(--danger);
+      padding: 0 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .habit-add-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 12px; }
+    .habit-add-btn { min-height: 39px; margin: 0; width: auto; padding-inline: 14px; }
+
+    @media (max-width: 380px) {
+      .habit-home-grid { gap: 3px; }
+    }
+
+</style>
+</head>
+<body>
+  <main class="app" id="app"></main>
+  <button class="settings-fab" id="settingsFab" aria-label="Settings" title="Settings">⚙</button>
+  <button class="library-fab" id="libraryFab" aria-label="Exercise library">Library</button>
+
+  <div class="modal-backdrop" id="settingsBackdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-label="Workout settings">
+      <div class="modal-head"><h2>Edit workouts</h2><button class="close-btn" id="closeSettings" aria-label="Close settings">×</button></div>
+      <div id="settingsContent"></div>
+      <button class="primary-btn" id="addDayBtn">+ Add workout day</button>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="libraryBackdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-label="Exercise library">
+      <div class="modal-head"><h2 id="libraryTitle">Exercise library</h2><button class="close-btn" id="closeLibrary" aria-label="Close library">×</button></div>
+      <div id="libraryContent"></div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="strengthBackdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-label="Strength progress">
+      <div class="modal-head"><h2 id="strengthTitle">Strength progress</h2><button class="close-btn" id="closeStrength" aria-label="Close strength chart">×</button></div>
+      <div id="strengthContent"></div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="volumeBackdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-label="Weekly muscle sets">
+      <div class="modal-head"><h2>Weekly sets</h2><button class="close-btn" id="closeVolume" aria-label="Close weekly sets">×</button></div>
+      <div id="volumeContent"></div>
+    </section>
+  </div>
+
+
+
+  <div class="modal-backdrop" id="habitsBackdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-label="Habits">
+      <div class="modal-head"><h2>Habits</h2><button class="close-btn" id="closeHabits" aria-label="Close habits">×</button></div>
+      <div id="habitsContent"></div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="quoteBackdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-label="Motivation">
+      <div class="modal-head"><h2>Get your head right</h2><button class="close-btn" id="closeQuote" aria-label="Close motivation">×</button></div>
+      <div class="quote-stage"><p class="quote-text" id="quoteText"></p></div>
+      <div class="quote-controls"><button class="primary-btn" id="newQuoteBtn">Another one</button></div>
+      <div class="quote-hint">No speeches. Just the reminder you needed.</div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'simpleGymTracker_v1';
+
+    // Practical hypertrophy working ranges. These are not claimed to be unique physiological optima.
+    // The ranges are deliberately narrower than the full evidence-supported hypertrophy spectrum so
+    // that progression is easier to track and technique/fatigue remain manageable for each exercise.
+    const EXERCISE_LIBRARY = [
+      {id:'bench_press',name:'Bench Press',aliases:['Barbell Bench Press'],category:'Chest',min:6,max:10,increment:2.5,primary:['Pectoralis major'],secondary:['Triceps brachii','Anterior deltoid'],note:'Stable heavy compound. Use controlled full ROM and keep most sets just short of failure.'},
+      {id:'incline_barbell_press',name:'Incline Barbell Press',category:'Chest',min:6,max:10,increment:2.5,primary:['Clavicular pectoralis major (upper chest)'],secondary:['Anterior deltoid','Triceps brachii'],note:'Incline pressing biases the clavicular region of the chest while still heavily involving triceps and front delts.'},
+      {id:'db_bench',name:'Dumbbell Bench Press',category:'Chest',min:6,max:12,increment:2.5,primary:['Pectoralis major'],secondary:['Triceps brachii','Anterior deltoid'],note:'A stable compound press with a large usable ROM.'},
+      {id:'incline_db_press',name:'Incline Dumbbell Press',category:'Chest',min:6,max:12,increment:2.5,primary:['Clavicular pectoralis major (upper chest)'],secondary:['Anterior deltoid','Triceps brachii'],note:'Good chest-focused compound with freedom to use a comfortable arm path.'},
+      {id:'machine_chest_press',name:'Machine Chest Press',category:'Chest',min:8,max:15,increment:5,primary:['Pectoralis major'],secondary:['Triceps brachii','Anterior deltoid'],note:'High stability makes moderate and higher reps practical with low balance demands.'},
+      {id:'smith_bench',name:'Smith Machine Bench Press',category:'Chest',min:6,max:12,increment:2.5,primary:['Pectoralis major'],secondary:['Triceps brachii','Anterior deltoid'],note:'Stable pressing variation that makes close-to-failure work easier to control.'},
+      {id:'cable_fly',name:'Cable Fly',category:'Chest',min:10,max:20,increment:2.5,primary:['Pectoralis major'],secondary:['Anterior deltoid'],note:'Isolation-style chest work; higher reps are practical because systemic fatigue is low.'},
+      {id:'pec_deck',name:'Pec Deck',category:'Chest',min:10,max:20,increment:5,primary:['Pectoralis major'],secondary:['Anterior deltoid'],note:'Very stable chest isolation exercise that is easy to take close to failure.'},
+      {id:'db_fly',name:'Dumbbell Fly',category:'Chest',min:8,max:15,increment:2.5,primary:['Pectoralis major'],secondary:['Anterior deltoid'],note:'Use a controlled stretch and avoid forcing excessive shoulder range.'},
+
+      {id:'lat_pulldown',name:'Lat Pulldown',category:'Back',min:6,max:12,increment:5,primary:['Latissimus dorsi'],secondary:['Biceps brachii','Brachialis','Teres major','Mid/lower trapezius'],note:'Grip variations do not appear to radically change lat recruitment; choose a grip that is strong and comfortable.'},
+      {id:'pull_up',name:'Pull-Up',category:'Back',min:5,max:10,increment:2.5,primary:['Latissimus dorsi'],secondary:['Biceps brachii','Brachialis','Teres major','Mid/lower trapezius'],note:'Excellent vertical pull. Add load once bodyweight reps are consistently at the top of the range.'},
+      {id:'assisted_pullup',name:'Assisted Pull-Up',category:'Back',min:6,max:12,increment:5,primary:['Latissimus dorsi'],secondary:['Biceps brachii','Brachialis','Teres major','Mid/lower trapezius'],note:'Progress by reducing assistance rather than adding weight.'},
+      {id:'chest_supported_row',name:'Chest-Supported Row',category:'Back',min:6,max:12,increment:2.5,primary:['Latissimus dorsi','Rhomboids','Middle trapezius'],secondary:['Posterior deltoid','Biceps brachii','Brachialis'],note:'Chest support reduces lower-back fatigue and makes the upper-back musculature easier to load hard.'},
+      {id:'seated_row',name:'Seated Row',aliases:['Seated Cable Row'],category:'Back',min:6,max:12,increment:5,primary:['Latissimus dorsi','Rhomboids','Middle trapezius'],secondary:['Posterior deltoid','Biceps brachii','Brachialis'],note:'Use a controlled reach and pull without turning it into a lower-back movement.'},
+      {id:'barbell_row',name:'Barbell Row',category:'Back',min:5,max:10,increment:2.5,primary:['Latissimus dorsi','Rhomboids','Middle trapezius'],secondary:['Posterior deltoid','Biceps brachii','Spinal erectors'],note:'Effective but more systemically fatiguing than chest-supported or machine rows.'},
+      {id:'db_row',name:'One-Arm Dumbbell Row',category:'Back',min:6,max:12,increment:2.5,primary:['Latissimus dorsi','Rhomboids'],secondary:['Posterior deltoid','Biceps brachii','Middle trapezius'],note:'Useful unilateral row with a large range of motion.'},
+      {id:'machine_row',name:'Machine Row',category:'Back',min:8,max:15,increment:5,primary:['Latissimus dorsi','Rhomboids','Middle trapezius'],secondary:['Posterior deltoid','Biceps brachii'],note:'High stability makes close-to-failure work practical.'},
+      {id:'straight_arm_pd',name:'Straight-Arm Pulldown',category:'Back',min:10,max:20,increment:2.5,primary:['Latissimus dorsi'],secondary:['Teres major','Long head triceps (isometric/supporting)'],note:'Lat-focused shoulder-extension movement with little elbow-flexor limitation.'},
+      {id:'cable_pullover',name:'Cable Pullover',category:'Back',min:10,max:20,increment:2.5,primary:['Latissimus dorsi'],secondary:['Teres major','Pectoralis major'],note:'Useful lat isolation-style movement when performed through a controlled stretch.'},
+
+      {id:'ohp',name:'Overhead Press',aliases:['Barbell Overhead Press'],category:'Shoulders',min:5,max:10,increment:2.5,primary:['Anterior deltoid'],secondary:['Lateral deltoid','Triceps brachii','Upper chest'],note:'Heavy compound shoulder press; front delts and triceps do most of the work.'},
+      {id:'db_shoulder_press',name:'Dumbbell Shoulder Press',category:'Shoulders',min:6,max:12,increment:2.5,primary:['Anterior deltoid'],secondary:['Lateral deltoid','Triceps brachii'],note:'Good compound shoulder option with freedom to use a comfortable arm path.'},
+      {id:'machine_shoulder_press',name:'Machine Shoulder Press',category:'Shoulders',min:8,max:15,increment:5,primary:['Anterior deltoid'],secondary:['Lateral deltoid','Triceps brachii'],note:'Stable option that is easy to push close to failure.'},
+      {id:'db_lateral_raise',name:'Dumbbell Lateral Raise',category:'Shoulders',min:10,max:20,increment:1,primary:['Lateral deltoid'],secondary:['Anterior/posterior deltoid','Upper trapezius'],note:'Higher reps suit the small load increments and low systemic fatigue of lateral raises.'},
+      {id:'cable_lateral_raise',name:'Cable Lateral Raise',category:'Shoulders',min:10,max:20,increment:1,primary:['Lateral deltoid'],secondary:['Anterior/posterior deltoid','Upper trapezius'],note:'Cable and dumbbell lateral raises have both produced similar lateral-delt growth in direct research.'},
+      {id:'reverse_pec_deck',name:'Reverse Pec Deck',category:'Shoulders',min:10,max:20,increment:5,primary:['Posterior deltoid'],secondary:['Rhomboids','Middle trapezius'],note:'Stable rear-delt movement with low systemic fatigue.'},
+      {id:'rear_delt_cable',name:'Rear Delt Cable Fly',category:'Shoulders',min:10,max:20,increment:2.5,primary:['Posterior deltoid'],secondary:['Rhomboids','Middle trapezius'],note:'Cable resistance is useful for controlled rear-delt work.'},
+
+      {id:'barbell_curl',name:'Barbell Curl',category:'Biceps',min:6,max:12,increment:2.5,primary:['Biceps brachii','Brachialis'],secondary:['Brachioradialis','Forearm flexors'],note:'Simple heavy elbow-flexion movement.'},
+      {id:'ez_curl',name:'EZ-Bar Curl',category:'Biceps',min:6,max:12,increment:2.5,primary:['Biceps brachii','Brachialis'],secondary:['Brachioradialis','Forearm flexors'],note:'Often more wrist-friendly than a straight bar while still allowing useful loading.'},
+      {id:'db_curl',name:'Dumbbell Curl',aliases:['Biceps Curl'],category:'Biceps',min:8,max:15,increment:2.5,primary:['Biceps brachii','Brachialis'],secondary:['Brachioradialis','Forearm flexors'],note:'Flexible arm path and easy unilateral loading.'},
+      {id:'incline_curl',name:'Incline Dumbbell Curl',category:'Biceps',min:8,max:15,increment:2.5,primary:['Biceps brachii'],secondary:['Brachialis','Brachioradialis'],note:'Places the shoulder behind the torso and loads the elbow flexors through a long range.'},
+      {id:'preacher_curl',name:'Preacher Curl',category:'Biceps',min:8,max:15,increment:2.5,primary:['Biceps brachii','Brachialis'],secondary:['Brachioradialis'],note:'Very stable curl; regional growth can differ from other curl variations, so exercise variety can be useful.'},
+      {id:'bayesian_curl',name:'Bayesian Cable Curl',category:'Biceps',min:10,max:20,increment:2.5,primary:['Biceps brachii'],secondary:['Brachialis','Brachioradialis'],note:'Cable setup can keep tension high with the arm behind the torso.'},
+      {id:'hammer_curl',name:'Hammer Curl',category:'Biceps',min:8,max:15,increment:2.5,primary:['Brachialis','Brachioradialis'],secondary:['Biceps brachii'],note:'Neutral grip shifts more emphasis toward brachialis and brachioradialis.'},
+      {id:'cable_curl',name:'Cable Curl',category:'Biceps',min:10,max:20,increment:2.5,primary:['Biceps brachii','Brachialis'],secondary:['Brachioradialis'],note:'Stable resistance and easy small load progressions.'},
+
+      {id:'pushdown',name:'Triceps Pushdown',category:'Triceps',min:8,max:15,increment:2.5,primary:['Triceps brachii'],secondary:['Anconeus'],note:'Stable triceps isolation exercise; good for hard sets without much systemic fatigue.'},
+      {id:'overhead_triceps',name:'Overhead Cable Triceps Extension',category:'Triceps',min:10,max:20,increment:2.5,primary:['Triceps brachii (especially long head)'],secondary:['Anconeus'],note:'Overhead elbow extension trains the long head at a longer muscle length and has shown greater triceps growth than neutral-arm extension in direct research.'},
+      {id:'skullcrusher',name:'Skull Crusher',aliases:['Lying Triceps Extension'],category:'Triceps',min:8,max:15,increment:2.5,primary:['Triceps brachii'],secondary:['Anconeus'],note:'Use a controlled elbow path and a load that does not irritate the elbows.'},
+      {id:'close_grip_bench',name:'Close-Grip Bench Press',category:'Triceps',min:6,max:10,increment:2.5,primary:['Triceps brachii'],secondary:['Pectoralis major','Anterior deltoid'],note:'Heavy triceps-focused press, although the chest and front delts still contribute.'},
+      {id:'dip',name:'Dip',category:'Triceps',min:6,max:12,increment:2.5,primary:['Triceps brachii','Pectoralis major'],secondary:['Anterior deltoid'],note:'Torso angle and elbow path alter the relative chest/triceps contribution.'},
+
+      {id:'back_squat',name:'Squat',aliases:['Back Squat'],category:'Legs',min:5,max:10,increment:2.5,primary:['Quadriceps','Gluteus maximus'],secondary:['Adductors','Spinal erectors'],note:'Large compound movement. Full comfortable depth generally provides more complete muscular loading than deliberately shallow reps.'},
+      {id:'front_squat',name:'Front Squat',category:'Legs',min:5,max:10,increment:2.5,primary:['Quadriceps','Gluteus maximus'],secondary:['Adductors','Spinal erectors','Upper back'],note:'Quad-focused squat pattern with substantial trunk demand.'},
+      {id:'hack_squat',name:'Hack Squat',category:'Legs',min:6,max:12,increment:5,primary:['Quadriceps','Gluteus maximus'],secondary:['Adductors'],note:'Stable squat pattern that makes hard quad-focused sets easier to standardize.'},
+      {id:'leg_press',name:'Leg Press',category:'Legs',min:8,max:15,increment:10,primary:['Quadriceps','Gluteus maximus'],secondary:['Adductors','Hamstrings'],note:'Highly stable lower-body compound; useful for high local effort with less balance demand.'},
+      {id:'leg_extension',name:'Leg Extension',category:'Legs',min:10,max:20,increment:5,primary:['Quadriceps'],secondary:[],note:'Direct knee-extension work. Squats and leg extensions can produce different regional quadriceps growth, so both can have a place.'},
+      {id:'bulgarian_split',name:'Bulgarian Split Squat',category:'Legs',min:6,max:12,increment:2.5,primary:['Quadriceps','Gluteus maximus'],secondary:['Adductors','Hamstrings'],note:'Unilateral compound that trains quads and glutes through a large range of motion.'},
+      {id:'walking_lunge',name:'Walking Lunge',category:'Legs',min:8,max:15,increment:2.5,primary:['Quadriceps','Gluteus maximus'],secondary:['Adductors','Hamstrings'],note:'Count reps per leg consistently.'},
+      {id:'smith_squat',name:'Smith Machine Squat',category:'Legs',min:6,max:12,increment:2.5,primary:['Quadriceps','Gluteus maximus'],secondary:['Adductors'],note:'Stable squat pattern that reduces balance demands.'},
+      {id:'rdl',name:'Romanian Deadlift',category:'Legs',min:6,max:10,increment:2.5,primary:['Hamstrings','Gluteus maximus'],secondary:['Adductors','Spinal erectors'],note:'Hip hinge that loads the hamstrings strongly at long muscle lengths.'},
+      {id:'seated_leg_curl',name:'Seated Leg Curl',aliases:['Leg Curl'],category:'Legs',min:8,max:15,increment:5,primary:['Hamstrings'],secondary:['Gastrocnemius'],note:'Direct evidence found greater whole-hamstring growth than prone leg curls, likely because the biarticular hamstrings train at longer muscle lengths.'},
+      {id:'lying_leg_curl',name:'Lying Leg Curl',category:'Legs',min:8,max:15,increment:5,primary:['Hamstrings'],secondary:['Gastrocnemius'],note:'Effective knee-flexion exercise, though seated curls may better lengthen the biarticular hamstrings.'},
+      {id:'hip_thrust',name:'Hip Thrust',category:'Legs',min:6,max:12,increment:5,primary:['Gluteus maximus'],secondary:['Hamstrings','Adductors'],note:'Glute-focused hip extension. Squats and hip thrusts can both grow the glutes; squats typically add more thigh growth.'},
+      {id:'glute_bridge',name:'Glute Bridge',category:'Legs',min:8,max:15,increment:5,primary:['Gluteus maximus'],secondary:['Hamstrings'],note:'Stable hip-extension movement with a shorter ROM than many squat/hinge patterns.'},
+      {id:'good_morning',name:'Good Morning',category:'Legs',min:6,max:10,increment:2.5,primary:['Hamstrings','Gluteus maximus'],secondary:['Spinal erectors','Adductors'],note:'Use conservative loading and strict hinge mechanics.'},
+      {id:'back_extension',name:'45° Back Extension',category:'Legs',min:8,max:15,increment:2.5,primary:['Gluteus maximus','Hamstrings'],secondary:['Spinal erectors'],note:'Can be biased toward hip extension by keeping the spine controlled and moving at the hips.'},
+      {id:'standing_calf',name:'Standing Calf Raise',category:'Calves',min:8,max:15,increment:5,primary:['Gastrocnemius'],secondary:['Soleus'],note:'Direct research found substantially greater gastrocnemius growth with standing than seated calf raises.'},
+      {id:'seated_calf',name:'Seated Calf Raise',category:'Calves',min:10,max:20,increment:5,primary:['Soleus'],secondary:['Gastrocnemius'],note:'Bent-knee position reduces gastrocnemius contribution and makes this useful for soleus-focused work.'},
+
+      {id:'shrug',name:'Shrug',category:'Traps',min:8,max:15,increment:5,primary:['Upper trapezius'],secondary:['Levator scapulae','Forearm/grip muscles'],note:'Use controlled scapular elevation without rolling the shoulders.'},
+      {id:'cable_crunch',name:'Cable Crunch',category:'Abs',min:10,max:20,increment:5,primary:['Rectus abdominis'],secondary:['Obliques'],note:'Load spinal flexion under control and progress like any other resistance exercise.'},
+      {id:'hanging_leg_raise',name:'Hanging Leg Raise',category:'Abs',min:8,max:15,increment:0,primary:['Rectus abdominis','Hip flexors'],secondary:['Obliques','Grip muscles'],note:'Posterior pelvic tilt increases abdominal contribution.'},
+      {id:'ab_wheel',name:'Ab Wheel Rollout',category:'Abs',min:6,max:15,increment:0,primary:['Rectus abdominis'],secondary:['Obliques','Latissimus dorsi','Serratus anterior','Hip flexors'],note:'Progress range of motion before adding external load.'}
+    ];
+
+    const libraryById = Object.fromEntries(EXERCISE_LIBRARY.map(x => [x.id, x]));
+
+    const SIMPLE_MUSCLE_NAMES = {
+      'Pectoralis major':'Chest',
+      'Clavicular pectoralis major (upper chest)':'Upper chest',
+      'Triceps brachii':'Triceps',
+      'Triceps brachii (especially long head)':'Long triceps head',
+      'Long head triceps (isometric/supporting)':'Long triceps head',
+      'Anterior deltoid':'Front delts',
+      'Lateral deltoid':'Side delts',
+      'Posterior deltoid':'Rear delts',
+      'Anterior/posterior deltoid':'Front + rear delts',
+      'Upper trapezius':'Upper traps',
+      'Middle trapezius':'Mid traps',
+      'Mid/lower trapezius':'Mid / lower traps',
+      'Latissimus dorsi':'Lats',
+      'Rhomboids':'Upper back',
+      'Teres major':'Upper lats',
+      'Biceps brachii':'Biceps',
+      'Brachialis':'Brachialis (under biceps)',
+      'Brachioradialis':'Upper forearms',
+      'Forearm flexors':'Forearms',
+      'Forearm/grip muscles':'Forearms / grip',
+      'Grip muscles':'Forearms / grip',
+      'Anconeus':'Elbow stabilisers',
+      'Quadriceps':'Quads',
+      'Gluteus maximus':'Glutes',
+      'Adductors':'Inner thighs',
+      'Spinal erectors':'Lower back',
+      'Gastrocnemius':'Upper calves',
+      'Soleus':'Deep calves',
+      'Levator scapulae':'Upper traps / neck',
+      'Rectus abdominis':'Abs',
+      'Obliques':'Obliques',
+      'Hip flexors':'Hip flexors',
+      'Serratus anterior':'Serratus (side ribs)',
+      'Upper back':'Upper back',
+      'Upper chest':'Upper chest',
+      'Hamstrings':'Hamstrings'
+    };
+
+    const TRICEPS_DISPLAY = {
+      pushdown: {primary:['Side triceps head','Inner triceps head'], secondary:['Long triceps head']},
+      overhead_triceps: {primary:['Long triceps head'], secondary:['Side triceps head','Inner triceps head']},
+      skullcrusher: {primary:['Long triceps head','Side triceps head'], secondary:['Inner triceps head']},
+      close_grip_bench: {primary:['Triceps (all 3 heads)'], secondary:['Chest','Front delts']},
+      dip: {primary:['Triceps','Chest'], secondary:['Front delts']}
+    };
+
+    function simpleMuscleName(name) { return SIMPLE_MUSCLE_NAMES[name] || name; }
+    function simpleMuscles(lib, role) {
+      if (!lib) return [];
+      if (TRICEPS_DISPLAY[lib.id] && TRICEPS_DISPLAY[lib.id][role]) return TRICEPS_DISPLAY[lib.id][role];
+      return (lib[role] || []).map(simpleMuscleName);
+    }
+
+    const MAJOR_MUSCLES = ['Chest','Lats','Upper back','Traps','Front delts','Side delts','Rear delts','Biceps','Triceps','Quads','Hamstrings','Glutes','Calves','Abs'];
+    function majorMuscleForRaw(name) {
+      if (name === 'Pectoralis major' || name === 'Clavicular pectoralis major (upper chest)') return 'Chest';
+      if (name === 'Latissimus dorsi') return 'Lats';
+      if (['Rhomboids','Middle trapezius','Mid/lower trapezius','Teres major','Upper back'].includes(name)) return 'Upper back';
+      if (name === 'Upper trapezius') return 'Traps';
+      if (name === 'Anterior deltoid') return 'Front delts';
+      if (name === 'Lateral deltoid') return 'Side delts';
+      if (name === 'Posterior deltoid' || name === 'Anterior/posterior deltoid') return 'Rear delts';
+      if (['Biceps brachii','Brachialis','Brachioradialis'].includes(name)) return 'Biceps';
+      if (name.startsWith('Triceps brachii')) return 'Triceps';
+      if (name === 'Quadriceps') return 'Quads';
+      if (name === 'Hamstrings') return 'Hamstrings';
+      if (name === 'Gluteus maximus') return 'Glutes';
+      if (name === 'Gastrocnemius' || name === 'Soleus') return 'Calves';
+      if (name === 'Rectus abdominis' || name === 'Obliques') return 'Abs';
+      return null;
+    }
+    function primaryMajorMuscles(lib) {
+      return [...new Set((lib?.primary || []).map(majorMuscleForRaw).filter(Boolean))];
+    }
+
+    function cryptoId() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+    }
+
+    const defaultData = {
+      days: [
+        { id: cryptoId(), name: 'Chest / Triceps', exercises: [
+          { id: cryptoId(), name: 'Bench Press', libraryId: 'bench_press' },
+          { id: cryptoId(), name: 'Incline Dumbbell Press', libraryId: 'incline_db_press' },
+          { id: cryptoId(), name: 'Triceps Pushdown', libraryId: 'pushdown' }
+        ]},
+        { id: cryptoId(), name: 'Back / Biceps', exercises: [
+          { id: cryptoId(), name: 'Lat Pulldown', libraryId: 'lat_pulldown' },
+          { id: cryptoId(), name: 'Seated Row', libraryId: 'seated_row' },
+          { id: cryptoId(), name: 'Dumbbell Curl', libraryId: 'db_curl' }
+        ]},
+        { id: cryptoId(), name: 'Legs', exercises: [
+          { id: cryptoId(), name: 'Squat', libraryId: 'back_squat' },
+          { id: cryptoId(), name: 'Leg Press', libraryId: 'leg_press' },
+          { id: cryptoId(), name: 'Seated Leg Curl', libraryId: 'seated_leg_curl' }
+        ]}
+      ],
+      logs: {},
+      history: {},
+      habits: [
+        { id: cryptoId(), name: 'Gym / training', createdOn: localDateKey(new Date()), archivedOn: null },
+        { id: cryptoId(), name: '10k steps', createdOn: localDateKey(new Date()), archivedOn: null },
+        { id: cryptoId(), name: 'Read 10 pages', createdOn: localDateKey(new Date()), archivedOn: null },
+        { id: cryptoId(), name: 'No doomscrolling late', createdOn: localDateKey(new Date()), archivedOn: null },
+        { id: cryptoId(), name: 'Bed on time', createdOn: localDateKey(new Date()), archivedOn: null }
+      ],
+      habitLog: {}
+    };
+
+    let data = loadData();
+    let currentDayId = null;
+    let libraryMode = 'browse';
+    let pickerDayId = null;
+    let volumeWeekOffset = 0;
+    let selectedHabitDate = null;
+
+    function structuredCloneSafe(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+    function normalizeName(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+
+    function matchLibrary(name) {
+      const n = normalizeName(name);
+      return EXERCISE_LIBRARY.find(item => normalizeName(item.name) === n || (item.aliases || []).some(a => normalizeName(a) === n)) || null;
+    }
+
+    function migrateData(raw) {
+      const d = raw && typeof raw === 'object' ? raw : structuredCloneSafe(defaultData);
+      if (!Array.isArray(d.days)) d.days = [];
+      if (!d.logs || typeof d.logs !== 'object') d.logs = {};
+      if (!d.history || typeof d.history !== 'object') d.history = {};
+      if (!Array.isArray(d.habits)) d.habits = structuredCloneSafe(defaultData.habits);
+      if (!d.habitLog || typeof d.habitLog !== 'object') d.habitLog = {};
+      d.habits.forEach(habit => {
+        if (!habit.id) habit.id = cryptoId();
+        if (!habit.name) habit.name = 'Untitled habit';
+        if (!habit.createdOn) habit.createdOn = localDateKey(new Date());
+        if (typeof habit.archivedOn !== 'string') habit.archivedOn = null;
+      });
+      d.days.forEach(day => {
+        if (!Array.isArray(day.exercises)) day.exercises = [];
+        day.exercises.forEach(ex => {
+          if (!ex.libraryId || !libraryById[ex.libraryId]) {
+            const matched = matchLibrary(ex.name);
+            if (matched) ex.libraryId = matched.id;
+          }
+          if (typeof ex.increment !== 'number') {
+            const lib = getLibraryForExercise(ex);
+            ex.increment = lib ? lib.increment : 2.5;
+          }
+          if (typeof ex.customMin !== 'number') ex.customMin = null;
+          if (typeof ex.customMax !== 'number') ex.customMax = null;
+        });
+      });
+      return d;
+    }
+
+    function loadData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return migrateData(saved ? JSON.parse(saved) : structuredCloneSafe(defaultData));
+      } catch {
+        return migrateData(structuredCloneSafe(defaultData));
+      }
+    }
+
+    function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+    function getLibraryForExercise(ex) {
+      return (ex.libraryId && libraryById[ex.libraryId]) || matchLibrary(ex.name) || null;
+    }
+
+    function exerciseConfig(ex) {
+      const lib = getLibraryForExercise(ex);
+      let min = Number.isFinite(ex.customMin) && ex.customMin > 0 ? ex.customMin : (lib ? lib.min : 6);
+      let max = Number.isFinite(ex.customMax) && ex.customMax >= min ? ex.customMax : (lib ? lib.max : 12);
+      const increment = Number.isFinite(ex.increment) && ex.increment >= 0 ? ex.increment : (lib ? lib.increment : 2.5);
+      return { min, max, increment, lib };
+    }
+
+    function dayLog(dayId) {
+      if (!data.logs[dayId]) data.logs[dayId] = {};
+      return data.logs[dayId];
+    }
+
+    function exerciseSets(dayId, exerciseId) {
+      const log = dayLog(dayId);
+      if (!log[exerciseId]) log[exerciseId] = [{ weight: '', reps: '', failure: false, dropset: false }];
+      return log[exerciseId];
+    }
+
+    function historyFor(dayId, exerciseId) {
+      return (((data.history || {})[dayId] || {})[exerciseId]) || [];
+    }
+
+    function lastSession(dayId, exerciseId) {
+      const h = historyFor(dayId, exerciseId);
+      return h.length ? h[h.length - 1] : null;
+    }
+
+    function completedSets(sets) {
+      return sets
+        .map((s, i) => ({ index: i, weight: Number(s.weight), reps: Number(s.reps), failure: !!s.failure, dropset: !!s.dropset }))
+        .filter(s => Number.isFinite(s.weight) && s.weight >= 0 && Number.isFinite(s.reps) && s.reps > 0);
+    }
+
+    function roundToStep(value, step) {
+      if (!step || step <= 0) return Math.max(0, value);
+      const decimals = (String(step).split('.')[1] || '').length;
+      return Number((Math.round(value / step) * step).toFixed(decimals));
+    }
+
+    function formatWeight(w) {
+      if (!Number.isFinite(w)) return '—';
+      return Number.isInteger(w) ? String(w) : String(Number(w.toFixed(2)));
+    }
+
+    // Epley estimated 1RM. This is used as a consistent trend score, not a literal promise
+    // of what the user can max. Drop sets are deliberately excluded from the calculation.
+    function estimatedOneRepMax(weight, reps) {
+      if (!Number.isFinite(weight) || weight <= 0 || !Number.isFinite(reps) || reps <= 0) return null;
+      return weight * (1 + reps / 30);
+    }
+
+    function sessionStrength(session) {
+      if (!session || !Array.isArray(session.sets)) return null;
+      const normal = completedSets(session.sets).filter(s => !s.dropset && s.weight > 0);
+      if (!normal.length) return null;
+      let best = null;
+      let bestSet = null;
+      normal.forEach(s => {
+        const e1rm = estimatedOneRepMax(s.weight, s.reps);
+        if (e1rm !== null && (best === null || e1rm > best)) { best = e1rm; bestSet = s; }
+      });
+      return best === null ? null : { value: best, set: bestSet };
+    }
+
+    function strengthHistory(dayId, exerciseId) {
+      return historyFor(dayId, exerciseId).map(session => {
+        const score = sessionStrength(session);
+        return score ? { date: session.date, value: score.value, set: score.set } : null;
+      }).filter(Boolean);
+    }
+
+    function formatStrength(value) {
+      if (!Number.isFinite(value)) return '—';
+      return `${Number(value.toFixed(1))} kg`;
+    }
+
+    function formatDateShort(iso) {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '';
+      return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+    }
+
+    function escapeXml(value) {
+      return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[ch]));
+    }
+
+    function openStrengthChart(day, ex) {
+      const points = strengthHistory(day.id, ex.id);
+      document.getElementById('strengthTitle').textContent = `${ex.name} strength`;
+      const content = document.getElementById('strengthContent');
+
+      if (!points.length) {
+        content.innerHTML = '<div class="empty">No strength history yet.<br>Finish a workout with a weighted set to start the chart.</div>';
+        document.getElementById('strengthBackdrop').classList.add('open');
+        return;
+      }
+
+      const first = points[0].value;
+      const current = points[points.length - 1].value;
+      const best = Math.max(...points.map(p => p.value));
+      const change = first > 0 ? ((current - first) / first) * 100 : 0;
+      const sign = change > 0 ? '+' : '';
+      const changeClass = change > 0 ? 'strength-positive' : (change < 0 ? 'strength-negative' : '');
+
+      content.innerHTML = `
+        <div class="strength-stats">
+          <div class="strength-stat"><div class="strength-stat-label">Current</div><div class="strength-stat-value">${formatStrength(current)}</div><div class="strength-stat-sub">estimated 1RM</div></div>
+          <div class="strength-stat"><div class="strength-stat-label">Best</div><div class="strength-stat-value">${formatStrength(best)}</div><div class="strength-stat-sub">all logged sessions</div></div>
+          <div class="strength-stat"><div class="strength-stat-label">Change</div><div class="strength-stat-value ${changeClass}">${sign}${Number(change.toFixed(1))}%</div><div class="strength-stat-sub">vs first session</div></div>
+        </div>
+        <div class="chart-card"><div class="chart-wrap" id="strengthChartWrap"></div><div class="chart-note">Estimated 1RM uses your strongest non-drop-set performance from each finished workout. It can show progress when reps increase even before the weight goes up. Treat it as a trend, not an exact max-lift prediction.</div><div class="history-mini" id="strengthHistoryMini"></div></div>`;
+
+      renderStrengthSvg(content.querySelector('#strengthChartWrap'), points);
+
+      const mini = content.querySelector('#strengthHistoryMini');
+      points.slice(-5).reverse().forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'history-row';
+        row.innerHTML = `<span>${escapeXml(formatDateShort(p.date))}</span><span>${formatWeight(p.set.weight)} kg × ${p.set.reps} → ${formatStrength(p.value)}</span>`;
+        mini.appendChild(row);
+      });
+
+      document.getElementById('strengthBackdrop').classList.add('open');
+    }
+
+    function renderStrengthSvg(wrap, points) {
+      const width = 620, height = 270;
+      const margin = { left: 50, right: 16, top: 20, bottom: 42 };
+      const plotW = width - margin.left - margin.right;
+      const plotH = height - margin.top - margin.bottom;
+      const values = points.map(p => p.value);
+      const rawMin = Math.min(...values);
+      const rawMax = Math.max(...values);
+      let yMin = Math.max(0, rawMin * 0.9);
+      let yMax = rawMax * 1.1;
+      if (Math.abs(yMax - yMin) < 1) { yMin = Math.max(0, rawMin - 1); yMax = rawMax + 1; }
+      const x = i => points.length === 1 ? margin.left + plotW / 2 : margin.left + (i / (points.length - 1)) * plotW;
+      const y = v => margin.top + (1 - (v - yMin) / (yMax - yMin)) * plotH;
+
+      let svg = `<svg class="strength-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Estimated strength progress over time">`;
+      for (let i = 0; i <= 4; i++) {
+        const val = yMin + ((yMax - yMin) * i / 4);
+        const yy = y(val);
+        svg += `<line class="chart-grid" x1="${margin.left}" y1="${yy}" x2="${width-margin.right}" y2="${yy}" />`;
+        svg += `<text class="chart-axis-text" x="${margin.left-8}" y="${yy+4}" text-anchor="end">${Number(val.toFixed(1))}</text>`;
+      }
+      const pathPoints = points.map((p,i) => `${x(i)},${y(p.value)}`).join(' ');
+      if (points.length > 1) svg += `<polyline class="chart-line" points="${pathPoints}" />`;
+      points.forEach((p,i) => {
+        svg += `<circle class="chart-dot ${i === points.length - 1 ? 'latest' : ''}" cx="${x(i)}" cy="${y(p.value)}" r="5"><title>${escapeXml(formatDateShort(p.date))}: ${escapeXml(formatStrength(p.value))} from ${formatWeight(p.set.weight)} kg × ${p.set.reps}</title></circle>`;
+      });
+      const labels = points.length <= 6 ? points.map((_,i) => i) : [0, Math.floor((points.length-1)/2), points.length-1];
+      [...new Set(labels)].forEach(i => {
+        svg += `<text class="chart-axis-text" x="${x(i)}" y="${height-15}" text-anchor="middle">${escapeXml(formatDateShort(points[i].date))}</text>`;
+      });
+      svg += `<text class="chart-axis-text" transform="translate(14 ${margin.top + plotH/2}) rotate(-90)" text-anchor="middle">e1RM (kg)</text></svg>`;
+      wrap.innerHTML = svg;
+    }
+
+    function closeStrengthChart() { document.getElementById('strengthBackdrop').classList.remove('open'); }
+
+    function balancedPlusOne(reps, max) {
+      const out = reps.slice();
+      let best = -1;
+      let lowest = Infinity;
+      for (let i = 0; i < out.length; i++) {
+        if (out[i] >= max) continue;
+        if (out[i] < lowest) { lowest = out[i]; best = i; }
+      }
+      if (best >= 0) out[best] += 1;
+      return out;
+    }
+
+    function resetTargets(setCount, min, max) {
+      const base = Math.min(max, min + 2);
+      const arr = [];
+      for (let i = 0; i < setCount; i++) arr.push(Math.max(min, base - i));
+      return arr;
+    }
+
+    function median(values) {
+      if (!values.length) return null;
+      const s = values.slice().sort((a,b) => a-b);
+      const m = Math.floor(s.length / 2);
+      return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+    }
+
+    function straightSessionPattern(ex, session) {
+      if (!session || !Array.isArray(session.sets)) return null;
+      const cfg = exerciseConfig(ex);
+      const sets = completedSets(session.sets).filter(s => !s.dropset);
+      if (!sets.length) return null;
+      const reps = sets.map(s => s.reps);
+      const weights = sets.map(s => s.weight);
+      const sameWeight = weights.every(w => Math.abs(w - weights[0]) < 0.001);
+      const first = reps[0];
+      const last = reps[reps.length - 1];
+      const belowMinCount = reps.filter(r => r < cfg.min).length;
+      const earlyFailures = sets.slice(0, -1).filter(s => s.failure).length;
+      const anyFailure = sets.some(s => s.failure);
+      const avgReps = reps.reduce((a,b) => a+b, 0) / reps.length;
+      const totalReps = reps.reduce((a,b) => a+b, 0);
+      const severeCollapse = reps.length >= 3 && last < cfg.min && last <= first * 0.5 && (first - last) >= 4;
+      const firstTooHeavy = first < cfg.min && !!sets[0].failure;
+      const manyBelowMin = belowMinCount >= Math.ceil(reps.length / 2) && (anyFailure || avgReps < cfg.min - 1);
+      const allAtTop = reps.every(r => r >= cfg.max);
+      return {cfg, sets, reps, weights, sameWeight, workingWeight:weights[0], first, last, belowMinCount,
+        earlyFailures, anyFailure, avgReps, totalReps, severeCollapse, firstTooHeavy, manyBelowMin, allAtTop};
+    }
+
+    function sameWorkingWeight(a, b) {
+      return a && b && a.sameWeight && b.sameWeight && Math.abs(a.workingWeight - b.workingWeight) < 0.001;
+    }
+
+    function nextBalancedTarget(pattern) {
+      const reps = pattern.reps.map(r => Math.min(r, pattern.cfg.max));
+      const candidates = reps.map((r,i) => ({i,r,failure:!!pattern.sets[i].failure}))
+        .filter(x => x.r < pattern.cfg.max);
+      if (!candidates.length) return reps;
+
+      // If failure occurred before the final set, first make the same performance cleaner instead of
+      // blindly demanding another rep. This avoids creating a fatigue spiral from early-set failure.
+      if (pattern.earlyFailures > 0) return reps;
+
+      // Prefer adding the rep to the lowest-rep non-failure set; ties go to the earlier set.
+      // This gives intuitive targets such as 8,6,6 -> 8,7,6.
+      let pool = candidates.filter(x => !x.failure);
+      if (!pool.length) pool = candidates;
+      pool.sort((a,b) => (a.r - b.r) || (a.i - b.i));
+      reps[pool[0].i] += 1;
+      return reps;
+    }
+
+    function mixedLoadTarget(pattern) {
+      const targets = pattern.reps.map(r => Math.min(r, pattern.cfg.max));
+      const candidates = targets.map((r,i) => ({i,r,failure:!!pattern.sets[i].failure})).filter(x => x.r < pattern.cfg.max);
+      if (pattern.earlyFailures === 0 && candidates.length) {
+        let pool = candidates.filter(x => !x.failure);
+        if (!pool.length) pool = candidates;
+        pool.sort((a,b) => (a.r - b.r) || (a.i - b.i));
+        targets[pool[0].i] += 1;
+      }
+      return targets;
+    }
+
+    function recommendationConfidence(comparableCount) {
+      if (comparableCount >= 2) return 'High confidence';
+      if (comparableCount === 1) return 'Medium confidence';
+      return 'Low confidence';
+    }
+
+    function recommendNext(day, ex) {
+      const history = historyFor(day.id, ex.id);
+      if (!history.length) return null;
+      const session = history[history.length - 1];
+      const p = straightSessionPattern(ex, session);
+      if (!p) return null;
+      const {cfg, reps, weights, sameWeight, workingWeight, earlyFailures, allAtTop} = p;
+      const inc = cfg.increment;
+
+      const priorPatterns = history.slice(0, -1).map(s => straightSessionPattern(ex, s)).filter(Boolean);
+      const comparable = priorPatterns.filter(q => sameWorkingWeight(p, q) && q.reps.length === p.reps.length).slice(-3);
+      const recentTotals = comparable.map(q => q.totalReps);
+      const recentMedian = median(recentTotals);
+      const mostRecentComparable = comparable.length ? comparable[comparable.length - 1] : null;
+      const currentPoor = p.severeCollapse || p.firstTooHeavy || p.manyBelowMin;
+      const previousPoor = mostRecentComparable && (mostRecentComparable.severeCollapse || mostRecentComparable.firstTooHeavy || mostRecentComparable.manyBelowMin);
+      const clearOneOffDip = currentPoor && mostRecentComparable && !previousPoor && p.totalReps <= mostRecentComparable.totalReps - 2;
+      const repeatedPoor = currentPoor && !!previousPoor;
+      const confidence = recommendationConfidence(comparable.length);
+
+      if (!sameWeight) {
+        const targets = mixedLoadTarget(p);
+        const descending = weights.every((w,i) => i === 0 || w <= weights[i-1] + 0.001);
+        const pieces = weights.map((w,i) => `${formatWeight(w)}×${targets[i]}`);
+        return {
+          kind:'hold', weight:null, reps:targets, title:'Keep your set weights',
+          main: pieces.join(' · '),
+          note: `${descending ? 'Back-off set pattern detected.' : 'Mixed loads detected.'} Keep the same set weights and ${earlyFailures ? 'repeat the reps with less early failure' : 'add one total rep'}. ${confidence}.`
+        };
+      }
+
+      // A clear poor pattern with no contradictory history can justify one load step down. If the same
+      // weight was fine last time, treat the new result as a likely off-day first and repeat the load.
+      if (currentPoor && inc > 0 && !clearOneOffDip && (repeatedPoor || comparable.length === 0 || (recentMedian !== null && p.totalReps <= recentMedian - Math.max(2, reps.length)))) {
+        const newWeight = Math.max(0, roundToStep(workingWeight - inc, inc));
+        const targets = resetTargets(reps.length, cfg.min, cfg.max);
+        let reason = p.severeCollapse ? `Reps collapsed from ${p.first} to ${p.last}.` : (p.firstTooHeavy ? 'Your first working set was below range and reached failure.' : 'Too many working sets were below the target range.');
+        if (repeatedPoor) reason += ' This has now happened in consecutive comparable sessions.';
+        return {
+          kind:'reduce', weight:newWeight, reps:targets, title:'Reduce load next time',
+          main:`${formatWeight(newWeight)} kg × ${targets.join(', ')} reps`,
+          note:`${reason} Drop one configured weight step and rebuild. ${confidence}.`
+        };
+      }
+
+      if (clearOneOffDip) {
+        const targets = mostRecentComparable.reps.map(r => Math.min(r, cfg.max));
+        return {
+          kind:'hold', weight:workingWeight, reps:targets, title:'Repeat the weight',
+          main:`${formatWeight(workingWeight)} kg × ${targets.join(', ')} reps`,
+          note:`This session was clearly worse than your previous comparable one, so don't cut the load from one bad day. Aim to return to your prior performance, take full rest, and reassess next session. ${confidence}.`
+        };
+      }
+
+      if (allAtTop && inc > 0) {
+        const newWeight = roundToStep(workingWeight + inc, inc);
+        const targets = resetTargets(reps.length, cfg.min, cfg.max);
+        return {
+          kind:'increase', weight:newWeight, reps:targets, title:'Add weight next time',
+          main:`${formatWeight(newWeight)} kg × ${targets.join(', ')} reps`,
+          note:`Every straight set reached the top of the ${cfg.min}–${cfg.max} range. Increase by one configured weight step and rebuild within the range. ${confidence}.`
+        };
+      }
+
+      // Detect a genuine same-load stall, but do not force a load jump just to create novelty.
+      const totalsWithCurrent = comparable.slice(-2).map(q => q.totalReps).concat(p.totalReps);
+      const stalledThree = totalsWithCurrent.length === 3 && Math.max(...totalsWithCurrent) - Math.min(...totalsWithCurrent) <= 1;
+
+      const targets = nextBalancedTarget(p);
+      let note;
+      if (earlyFailures > 0) {
+        note = `Keep the load and repeat these reps, but avoid failure on the early sets; use enough rest and save failure for the final set if you want it.`;
+      } else {
+        note = `Keep the load and add one total rep while staying in the ${cfg.min}–${cfg.max} working range.`;
+      }
+      if (stalledThree) note += ' You have been essentially flat for three comparable sessions; prioritise full rest and clean execution before changing the load.';
+      note += ` ${confidence}.`;
+      return {
+        kind:'hold', weight:workingWeight, reps:targets, title: earlyFailures ? 'Repeat cleanly' : 'Keep the weight',
+        main:`${formatWeight(workingWeight)} kg × ${targets.join(', ')} reps`, note
+      };
+    }
+
+    function localWeekRange(offset = 0) {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const mondayIndex = (today.getDay() + 6) % 7;
+      const start = new Date(today);
+      start.setDate(today.getDate() - mondayIndex + (offset * 7));
+      const end = new Date(start);
+      end.setDate(start.getDate() + 7);
+      return {start, end};
+    }
+
+    function shortLocalDate(date) {
+      return date.toLocaleDateString(undefined, {day:'numeric', month:'short'});
+    }
+
+    function weeklyDirectSets(offset = 0) {
+      const {start, end} = localWeekRange(offset);
+      const counts = Object.fromEntries(MAJOR_MUSCLES.map(m => [m, 0]));
+      let unassigned = 0;
+      data.days.forEach(day => {
+        day.exercises.forEach(ex => {
+          const lib = getLibraryForExercise(ex);
+          const groups = primaryMajorMuscles(lib);
+          const sessions = historyFor(day.id, ex.id);
+          sessions.forEach(session => {
+            const date = new Date(session.date);
+            if (!(date >= start && date < end)) return;
+            const setCount = Array.isArray(session.sets) ? session.sets.filter(s => Number(s.reps) > 0).length : 0;
+            if (!setCount) return;
+            if (!groups.length) { unassigned += setCount; return; }
+            groups.forEach(group => counts[group] += setCount);
+          });
+        });
+      });
+      return {counts, unassigned, start, end};
+    }
+
+    function renderWeeklyVolume() {
+      const content = document.getElementById('volumeContent');
+      const summary = weeklyDirectSets(volumeWeekOffset);
+      const maxCount = Math.max(1, ...Object.values(summary.counts));
+      const endDisplay = new Date(summary.end);
+      endDisplay.setDate(endDisplay.getDate() - 1);
+      const weekName = volumeWeekOffset === 0 ? 'This week' : (volumeWeekOffset === -1 ? 'Last week' : `${Math.abs(volumeWeekOffset)} weeks ago`);
+      content.innerHTML = `
+        <div class="week-nav">
+          <button class="week-nav-btn" id="prevVolumeWeek" aria-label="Previous week">‹</button>
+          <div class="week-label"><div class="week-label-main">${weekName}</div><div class="week-label-sub">${shortLocalDate(summary.start)} – ${shortLocalDate(endDisplay)}</div></div>
+          <button class="week-nav-btn" id="nextVolumeWeek" aria-label="Next week" ${volumeWeekOffset >= 0 ? 'disabled' : ''}>›</button>
+        </div>
+        <div class="volume-grid" id="volumeGrid"></div>
+        <div class="volume-note" id="volumeNote"></div>`;
+      const grid = content.querySelector('#volumeGrid');
+      MAJOR_MUSCLES.forEach(muscle => {
+        const value = summary.counts[muscle] || 0;
+        const card = document.createElement('div');
+        card.className = 'volume-card';
+        card.innerHTML = `<div class="volume-muscle"></div><div><span class="volume-value"></span><span class="volume-unit">sets</span></div><div class="volume-bar"><div class="volume-bar-fill"></div></div>`;
+        card.querySelector('.volume-muscle').textContent = muscle;
+        card.querySelector('.volume-value').textContent = value;
+        card.querySelector('.volume-bar-fill').style.width = `${Math.round((value / maxCount) * 100)}%`;
+        grid.appendChild(card);
+      });
+      const note = content.querySelector('#volumeNote');
+      note.textContent = `Counts completed direct working sets from Monday to Sunday. Secondary-muscle work is not counted as a full set.${summary.unassigned ? ` ${summary.unassigned} set${summary.unassigned === 1 ? '' : 's'} from custom/unmatched exercises are not assigned to a muscle.` : ''}`;
+      content.querySelector('#prevVolumeWeek').addEventListener('click', () => { volumeWeekOffset -= 1; renderWeeklyVolume(); });
+      content.querySelector('#nextVolumeWeek').addEventListener('click', () => { if (volumeWeekOffset < 0) { volumeWeekOffset += 1; renderWeeklyVolume(); } });
+    }
+
+    function openWeeklyVolume() {
+      volumeWeekOffset = 0;
+      renderWeeklyVolume();
+      document.getElementById('volumeBackdrop').classList.add('open');
+    }
+    function closeWeeklyVolume() { document.getElementById('volumeBackdrop').classList.remove('open'); }
+
+    const MOTIVATION_QUOTES = [
+          "They fumbled you, bro.",
+          "Their loss. Your upgrade.",
+          "Stop auditioning for someone who already had front-row seats.",
+          "You do not need another sign. Move forward.",
+          "Miss them if you need to. Do not go backwards.",
+          "You were the opportunity.",
+          "Do not beg someone to recognize what they already had.",
+          "Let them wonder how you got so far without them.",
+          "The rejection was redirection. Now prove it useful.",
+          "You are not hard to love. They were just not your person.",
+          "Stop romanticising someone who was comfortable losing you.",
+          "If they wanted access to you, they should have valued it.",
+          "You survived before them. You will level up after them.",
+          "Do not chase closure. Build a life that makes it irrelevant.",
+          "You can miss the memory without reopening the door.",
+          "Their decision does not set your value.",
+          "You do not need to be chosen by everybody. Choose yourself properly.",
+          "Do not shrink just because they failed to see the whole picture.",
+          "Be too busy becoming undeniable to keep checking who noticed.",
+          "You are allowed to outgrow what you once wanted.",
+          "The version of you that wins does not send that message.",
+          "Your comeback does not need an audience.",
+          "Do not trade dignity for temporary attention.",
+          "Some doors closing is protection, not punishment.",
+          "They can be a good person and still be wrong for you.",
+          "You do not need revenge. You need momentum.",
+          "Let the silence do its job.",
+          "Your standards are not loneliness. They are filtration.",
+          "You are not behind. You are rebuilding properly.",
+          "Nobody is coming to save your confidence. Build it.",
+          "Make yourself proud enough that their opinion gets quiet.",
+          "The goal is not to make them regret it. The goal is to stop caring whether they do.",
+          "Stop checking the door. What is meant for you knows how to knock.",
+          "You are not losing them. You are losing the need to convince them.",
+          "They saw your value and still walked. Let them walk.",
+          "Never negotiate your worth with someone committed to misunderstanding it.",
+          "Do not confuse chemistry with compatibility.",
+          "You deserve consistency, not detective work.",
+          "Mixed signals are a clear enough signal.",
+          "Attention is cheap. Effort is expensive. Watch what they spend.",
+          "If you have to force it, it is already costing too much.",
+          "Being wanted sometimes is not the same as being chosen.",
+          "Do not build a future around someone else's maybe.",
+          "Your peace is worth more than one more conversation.",
+          "You cannot lose what was never fully choosing you.",
+          "The right person will not require you to abandon your self-respect.",
+          "You are one disciplined year away from barely recognising this version of yourself.",
+          "Get stronger. Get calmer. Get harder to shake.",
+          "Train like your future self is watching.",
+          "Nobody cares about the excuse once the set starts.",
+          "You came here to grow. Act like it.",
+          "One more clean rep. Earn the next version of you.",
+          "Do not waste pain. Convert it.",
+          "The bad day still counts if you show up.",
+          "Discipline is self-respect with a schedule.",
+          "Your feelings can ride in the car. They do not get to drive.",
+          "You are not waiting for motivation. You are building proof.",
+          "Do the boring work until the result gets loud.",
+          "Nobody remembers the days you nearly quit. They remember what you became.",
+          "Strong body. Clear head. Higher standards.",
+          "The set does not care who texted back.",
+          "Put the phone down. Pick the weight up.",
+          "Turn the disappointment into fucking momentum.",
+          "Do not train angry forever. Train committed.",
+          "Your confidence should come from promises you kept to yourself.",
+          "You said you wanted different. Behave different.",
+          "Stop needing witnesses. Keep stacking wins.",
+          "Make today evidence that you are changing.",
+          "You do not need perfect conditions. You need another honest set.",
+          "Every rep is a vote for who you are becoming.",
+          "You are not trying to feel unstoppable. You are practicing being reliable.",
+          "A rough week does not erase months of work.",
+          "Do not punish yourself. Progress yourself.",
+          "You are allowed to be hurt and still move with standards.",
+          "Have the feeling. Keep the plan.",
+          "The strongest move is often no message at all.",
+          "You do not need to prove your worth to the person who missed it.",
+          "There is nothing attractive about abandoning yourself to keep somebody.",
+          "Your next chapter does not need their approval.",
+          "The answer is not another paragraph. It is another month of progress.",
+          "Do not chase people. Chase alignment.",
+          "You are not replaceable just because someone moved on.",
+          "Someone failing to choose you does not make you less choice-worthy.",
+          "The right relationship will add peace, not make you earn basic certainty.",
+          "Let them have the version of the story where they lost you.",
+          "Be kind. Be dangerous to your old habits.",
+          "You have survived every day you thought would break you.",
+          "You are going to be okay. Now become fucking excellent.",
+          "No begging. No spiralling. No backwards steps.",
+          "Keep the dignity. Keep the gym membership. Keep moving.",
+          "Nobody is coming. Good. Build yourself.",
+          "You wanted a sign? This is it. Get to fucking work.",
+          "Stop negotiating with the version of you that keeps quitting.",
+          "You do not need hype. You need standards.",
+          "Do the rep you were about to avoid.",
+          "Your comfort zone has done enough damage.",
+          "Make discipline louder than your mood.",
+          "You can be tired without becoming weak-minded.",
+          "Earn the confidence you keep trying to think yourself into.",
+          "The work still works when nobody claps.",
+          "Quit waiting to feel ready. Ready is built under load.",
+          "The fucking plan does not care about your excuses.",
+          "You either build the body or build another excuse.",
+          "Be the person your old habits cannot survive around.",
+          "One hard hour can rescue a soft fucking day.",
+          "You do not rise to motivation. You fall to your standards.",
+          "Finish what the lazy version of you would leave half-done.",
+          "Your future body is being decided by what you do right now.",
+          "Stop looking for easier. Get better at hard.",
+          "The pain passes. The proof stays.",
+          "You have enough potential. Start producing evidence.",
+          "Make the next rep disrespectful to your old limits.",
+          "No one can do your fucking reps for you.",
+          "Excuses feel good for five minutes and look terrible for five years.",
+          "You are not stuck. You are under-disciplined. Fix it.",
+          "Every skipped session teaches you that your word means nothing. Stop teaching that lesson.",
+          "Keep promises to yourself like your life depends on it.",
+          "Do not ask whether you feel like it. Ask what the standard is.",
+          "Get obsessed with being reliable.",
+          "You cannot think your way into a body you refuse to train for.",
+          "Your competition is the version of you that keeps saying tomorrow.",
+          "Tomorrow is where weak plans go to die.",
+          "Today gets the fucking work.",
+          "If it matters, prove it with your calendar.",
+          "Discipline is doing the boring shit after the excitement dies.",
+          "Your feelings are temporary. Your habits are building your life.",
+          "The bar does not care about your heartbreak. Move it.",
+          "Take the pain somewhere useful.",
+          "Do not waste a breakup becoming smaller.",
+          "If they left, let the door close and the weights go up.",
+          "They do not need to regret losing you. You need to stop regretting yourself.",
+          "Become so grounded that rejection cannot fucking move you.",
+          "Stop checking whether they noticed. Notice your own progress.",
+          "You lost attention, not your future.",
+          "Do not turn one person's choice into your identity.",
+          "The answer is not in their profile. It is in your next fucking set.",
+          "No message is worth losing your self-respect over.",
+          "Let them go. Keep your standards.",
+          "You are not training for revenge. You are training because you said you would.",
+          "Use the hurt. Do not live in it.",
+          "They moved on? Good. You move forward.",
+          "Stop trying to win someone back. Win yourself back.",
+          "You do not need closure to close the fucking door.",
+          "Your comeback gets quieter and stronger from here.",
+          "Do not stalk the past. Build something it cannot follow.",
+          "What left you is not allowed to own your next year.",
+          "The strongest reply is a life that kept moving.",
+          "Be impossible to derail, not impossible to hurt.",
+          "You can feel everything and still do the fucking work.",
+          "Heartbreak is not a training program. Discipline is.",
+          "Stop turning sadness into inactivity.",
+          "Do not become bitter. Become built.",
+          "Let disappointment sharpen you, not poison you.",
+          "You were not rejected from your future.",
+          "One person not choosing you is not a verdict on your worth.",
+          "Get your dignity off the floor and your ass into the gym.",
+          "No chasing. No begging. No fucking excuses.",
+          "Do not send the paragraph. Send another set.",
+          "You can miss them and still refuse to go backwards.",
+          "Make peace with the loss, then make war on your excuses.",
+          "The version of you they knew is already outdated.",
+          "Build until your old life feels too small.",
+          "Stop asking who is watching. The mirror is enough.",
+          "You do not need applause to become dangerous.",
+          "Become difficult to disappoint because your confidence comes from you.",
+          "Nobody can ghost the work you put into yourself.",
+          "Your standards should scare your excuses.",
+          "Do not be impressive for a day. Be undeniable for years.",
+          "Consistency is fucking ruthless. Be more consistent.",
+          "You are one decision away from getting back on track.",
+          "Bad morning? Win the afternoon.",
+          "Bad week? Win the next fucking set.",
+          "Stop using one mistake as permission for five more.",
+          "Reset fast. Weakness loves a long spiral.",
+          "Do not wait for Monday. That is cowardly calendar bullshit.",
+          "Start where you are. Start fucking now.",
+          "A missed day is data, not a new identity.",
+          "Get back under the bar before your excuses get comfortable.",
+          "Momentum does not need perfection. It needs another action.",
+          "You are never too far off track for the next right decision.",
+          "Stop making failure dramatic. Correct it.",
+          "You fucked up? Good. Learn fast and continue.",
+          "One bad set means nothing. Your response means everything.",
+          "The goal is not never falling off. It is becoming savage at restarting.",
+          "Make recovery part of the plan, not an excuse to disappear.",
+          "Sleep. Eat. Train. Repeat. Stop overcomplicating the fucking basics.",
+          "If you want extraordinary results, respect ordinary habits.",
+          "The basics are boring because they fucking work.",
+          "Protein, sleep, progressive overload, patience. Stop searching for magic.",
+          "You do not need a secret. You need another month of consistency.",
+          "Your physique cannot tell whether you were motivated. It can tell whether you trained.",
+          "Track it. Beat it. Repeat it.",
+          "If the logbook is not moving, neither are you.",
+          "Earn the extra kilo before you fucking load it.",
+          "Clean reps build more than ego reps.",
+          "Control the weight or admit the weight controls you.",
+          "Technique first. Ego can wait outside.",
+          "Do not count the rep your target muscle did not earn.",
+          "Make every working set mean something.",
+          "Train hard enough to need recovery, smart enough to recover.",
+          "Failure is a tool, not your entire personality.",
+          "Do not chase pain. Chase progression.",
+          "A brutal set with shit form is still a shit set.",
+          "Intensity without control is just fucking noise.",
+          "You are here to stimulate muscle, not impress the dumbbells.",
+          "Own the eccentric. Own the stretch. Own the rep.",
+          "Stop rushing the part of the rep that actually builds you.",
+          "Make the muscle work, not your ego.",
+          "The set starts when it gets uncomfortable.",
+          "The last clean reps are where your excuses start screaming.",
+          "Do not confuse discomfort with danger.",
+          "You have more in you. Prove it cleanly.",
+          "One more rep, unless form says no. Be hard, not stupid.",
+          "Train like an animal. Think like a coach.",
+          "Hard training and intelligent training are not enemies.",
+          "The strongest lifter in the room is often the one who can leave ego alone.",
+          "Progress is ruthless with people who refuse to measure it.",
+          "Write the numbers down. Memory lies.",
+          "Beat the logbook by a rep and call it a fucking win.",
+          "Small progress compounds into a body people call genetics.",
+          "Nobody sees the hundred tiny wins behind the transformation.",
+          "Add one rep. Add one kilo. Add one fucking standard.",
+          "Do not disrespect small progress. It is how monsters are built.",
+          "You do not need to PR every session. You need to keep trending up.",
+          "Strength is built in boring increments.",
+          "The body you want is hiding inside thousands of ordinary sets.",
+          "Stack enough unremarkable days and the result becomes remarkable.",
+          "Patience is part of training. Stop fucking rushing biology.",
+          "You cannot speedrun muscle. You can only stop wasting time.",
+          "Give the process enough months to prove itself.",
+          "Do not change the plan because you got bored. Change it when the data says so.",
+          "Boredom is not a plateau.",
+          "Your program does not need entertainment. It needs execution.",
+          "Keep showing up until the numbers have no choice but to move.",
+          "Outwork your need for instant gratification.",
+          "You are building tissue, not ordering takeaway. It takes fucking time.",
+          "Slow progress is still progress. No progress from quitting is guaranteed.",
+          "Stay long enough to become the person beginners think is gifted.",
+          "Do not compare chapter ten to somebody else's chapter twenty.",
+          "Compare yourself to your own fucking logbook.",
+          "Jealousy is wasted energy. Convert it into reps.",
+          "Someone being ahead of you does not block your lane.",
+          "Admire the result, then go earn your own.",
+          "The room has enough space for you to become exceptional.",
+          "Stop watching other people live the discipline you keep postponing.",
+          "You are not behind. You are either working or you are not.",
+          "Your timeline is irrelevant if you refuse to move.",
+          "Get so focused your comparison habit starves.",
+          "Look in the mirror for instructions, not insults.",
+          "Respect the body you have enough to fucking train it.",
+          "Self-hate is not required for self-improvement.",
+          "Build from respect, then train with violence against the excuse.",
+          "You do not need to hate yourself to demand more from yourself.",
+          "Confidence is not pretending. It is receipts.",
+          "Every kept promise is another receipt.",
+          "Become someone you can trust under pressure.",
+          "If you say three sets, do three fucking sets.",
+          "Your word to yourself has to mean something.",
+          "Self-respect is built in private.",
+          "Do the thing nobody will congratulate you for.",
+          "Be proud later. Work now.",
+          "Your future self does not need another excuse from you.",
+          "Do not hand tomorrow the work you can finish today.",
+          "You have spent enough time thinking. Move.",
+          "Action clears fog that overthinking cannot touch.",
+          "Stop rehearsing the workout in your head. Start the fucking set.",
+          "The only mood you need is committed.",
+          "Do not let a temporary emotion make a permanent habit weaker.",
+          "You can be unmotivated and still be disciplined as fuck.",
+          "Motivation is welcome. Discipline has the key.",
+          "When motivation leaves, standards stay.",
+          "Be the fucker who still shows up.",
+          "You said you want more. More requires more from you.",
+          "Raise the standard before you raise the weight.",
+          "Nobody owes you results for effort you almost gave.",
+          "Half-assed work creates half-assed confidence.",
+          "Do it properly or stop pretending it matters.",
+          "The set is short. The regret from quitting early lasts longer.",
+          "Do not leave the gym wondering whether you could have worked harder.",
+          "Leave with nothing to negotiate with yourself about.",
+          "Earn your shower.",
+          "Earn your meal. Earn your sleep. Earn the fucking peace.",
+          "There is peace on the other side of doing what you said you would do.",
+          "Your brain wants comfort. Your goals want action.",
+          "Choose which one runs the fucking day.",
+          "Do not let five minutes of reluctance steal an hour of progress.",
+          "The hardest part is often putting your shoes on. Then stop being dramatic and go.",
+          "You know what to do. The question is whether you will fucking do it.",
+          "Knowledge without execution is just expensive procrastination.",
+          "Stop collecting advice and start collecting reps.",
+          "You do not need another video. You need another set.",
+          "The algorithm is not building your body. You are.",
+          "Close the feed. Open the logbook.",
+          "Doomscrolling has never built a fucking lat.",
+          "Put the phone face down and make your life more interesting than the screen.",
+          "Your attention is a weapon. Stop giving it away for free.",
+          "Protect your focus like it is part of your physique.",
+          "A distracted hour is not the same as a hard hour.",
+          "Train like you came here for a reason.",
+          "No wandering. No scrolling. Do the fucking work.",
+          "Rest between sets. Do not disappear into your phone.",
+          "Be present enough to know what your body is doing.",
+          "The gym is not where you escape your life. It is where you practice owning it.",
+          "You cannot control who stays. You can control who you become.",
+          "You cannot control the outcome. You can control today's fucking inputs.",
+          "Control the controllables until your life looks different.",
+          "Stop begging reality to be easier. Become more capable.",
+          "Life does not need to soften for you to get stronger.",
+          "Pressure reveals the standard. Raise it.",
+          "When things get hard, become fucking dependable.",
+          "The goal is not comfort. The goal is capacity.",
+          "Build a body and mind that can carry more.",
+          "Hard seasons are where weak identities get replaced.",
+          "Do not waste the season that is trying to forge you.",
+          "You asked for growth. Growth rarely arrives politely.",
+          "Take the lesson and keep moving.",
+          "No victim shit. Learn, adjust, advance.",
+          "You are responsible for what happens next.",
+          "That is not pressure. That is fucking power.",
+          "Own the next decision.",
+          "Own the next rep.",
+          "Own the next week.",
+          "Then look back and realise you rebuilt the whole fucking life."
+    ];
+
+
+    function localDateKey(date) {
+      const d = new Date(date);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function parseLocalDateKey(key) {
+      const [y, m, d] = String(key).split('-').map(Number);
+      return new Date(y, (m || 1) - 1, d || 1, 12, 0, 0, 0);
+    }
+
+    function addLocalDays(date, amount) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + amount);
+      return d;
+    }
+
+    function habitsForDate(dateKey) {
+      return (data.habits || []).filter(h => {
+        const created = h.createdOn || localDateKey(new Date());
+        const archived = h.archivedOn || null;
+        return created <= dateKey && (!archived || dateKey < archived);
+      });
+    }
+
+    function habitStatusForDate(dateKey) {
+      if (!data.habitLog[dateKey]) data.habitLog[dateKey] = {};
+      return data.habitLog[dateKey];
+    }
+
+    function habitCompletion(dateKey) {
+      const habits = habitsForDate(dateKey);
+      if (!habits.length) return { done: 0, total: 0, fraction: null };
+      const status = (data.habitLog || {})[dateKey] || {};
+      const done = habits.reduce((sum, h) => sum + (status[h.id] ? 1 : 0), 0);
+      return { done, total: habits.length, fraction: done / habits.length };
+    }
+
+    function habitShadeLevel(fraction) {
+      if (fraction === null) return -1;
+      if (fraction <= 0) return 0;
+      if (fraction >= 1) return 4;
+      if (fraction <= .25) return 1;
+      if (fraction <= .5) return 2;
+      return 3;
+    }
+
+    function lastThirtyDateKeys() {
+      const today = new Date();
+      const keys = [];
+      for (let i = 29; i >= 0; i--) keys.push(localDateKey(addLocalDays(today, -i)));
+      return keys;
+    }
+
+    function renderHabitHomeGrid() {
+      const grid = document.getElementById('habitHomeGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      const today = localDateKey(new Date());
+      lastThirtyDateKeys().forEach(dateKey => {
+        const progress = habitCompletion(dateKey);
+        const level = habitShadeLevel(progress.fraction);
+        const btn = document.createElement('button');
+        btn.className = `habit-day-square ${level < 0 ? 'no-habits' : `level-${level}`} ${dateKey === today ? 'today' : ''}`;
+        const date = parseLocalDateKey(dateKey);
+        const label = date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+        btn.setAttribute('aria-label', progress.total ? `${label}: ${progress.done} of ${progress.total} habits complete` : `${label}: no habits tracked`);
+        btn.title = progress.total ? `${label} · ${progress.done}/${progress.total}` : `${label} · no habits`;
+        btn.addEventListener('click', () => openHabits(dateKey));
+        grid.appendChild(btn);
+      });
+    }
+
+    function formatHabitDate(dateKey) {
+      const d = parseLocalDateKey(dateKey);
+      return d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+
+    function openHabits(dateKey = localDateKey(new Date())) {
+      selectedHabitDate = dateKey;
+      renderHabits();
+      document.getElementById('habitsBackdrop').classList.add('open');
+    }
+
+    function closeHabits() {
+      document.getElementById('habitsBackdrop').classList.remove('open');
+      if (!currentDayId) renderHome();
+    }
+
+    function renderHabits() {
+      const content = document.getElementById('habitsContent');
+      if (!content) return;
+      const todayKey = localDateKey(new Date());
+      if (!selectedHabitDate || selectedHabitDate > todayKey) selectedHabitDate = todayKey;
+      const habits = habitsForDate(selectedHabitDate);
+      const status = habitStatusForDate(selectedHabitDate);
+      const progress = habitCompletion(selectedHabitDate);
+      const selectedDate = parseLocalDateKey(selectedHabitDate);
+      const yesterdayKey = localDateKey(addLocalDays(selectedDate, -1));
+      const tomorrowKey = localDateKey(addLocalDays(selectedDate, 1));
+
+      content.innerHTML = `
+        <div class="habit-date-nav">
+          <button class="habit-date-btn" id="habitPrevDay" aria-label="Previous day">‹</button>
+          <div class="habit-date-label"><div class="habit-date-main" id="habitDateMain"></div><div class="habit-date-sub" id="habitDateSub"></div></div>
+          <button class="habit-date-btn" id="habitNextDay" aria-label="Next day">›</button>
+        </div>
+        <div class="habit-progress-line"><span>Completed</span><strong id="habitProgress"></strong></div>
+        <div class="habit-checklist" id="habitChecklist"></div>
+        <button class="small-btn habit-manage-toggle" id="habitManageToggle">Edit habits</button>
+        <div class="habit-manage" id="habitManage">
+          <div class="section-label">Your habits</div>
+          <div id="habitEditList"></div>
+          <div class="habit-add-row">
+            <input class="habit-edit-input" id="newHabitName" placeholder="New habit" aria-label="New habit name">
+            <button class="primary-btn habit-add-btn" id="addHabitAction">Add</button>
+          </div>
+        </div>`;
+
+      document.getElementById('habitDateMain').textContent = selectedHabitDate === todayKey ? 'Today' : formatHabitDate(selectedHabitDate);
+      document.getElementById('habitDateSub').textContent = selectedHabitDate === todayKey ? formatHabitDate(selectedHabitDate) : selectedHabitDate;
+      document.getElementById('habitProgress').textContent = progress.total ? `${progress.done} / ${progress.total}` : 'No habits';
+      document.getElementById('habitNextDay').disabled = selectedHabitDate >= todayKey;
+      document.getElementById('habitPrevDay').addEventListener('click', () => { selectedHabitDate = yesterdayKey; renderHabits(); });
+      document.getElementById('habitNextDay').addEventListener('click', () => { if (tomorrowKey <= todayKey) { selectedHabitDate = tomorrowKey; renderHabits(); } });
+
+      const checklist = document.getElementById('habitChecklist');
+      if (!habits.length) {
+        checklist.innerHTML = '<div class="habit-empty">No habits existed on this day.</div>';
+      } else {
+        habits.forEach(habit => {
+          const label = document.createElement('label');
+          label.className = `habit-check-row ${status[habit.id] ? 'done' : ''}`;
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.checked = !!status[habit.id];
+          input.setAttribute('aria-label', habit.name);
+          const name = document.createElement('span');
+          name.className = 'habit-check-name';
+          name.textContent = habit.name;
+          input.addEventListener('change', () => {
+            status[habit.id] = input.checked;
+            saveData();
+            renderHabits();
+          });
+          label.append(input, name);
+          checklist.appendChild(label);
+        });
+      }
+
+      const manage = document.getElementById('habitManage');
+      document.getElementById('habitManageToggle').addEventListener('click', () => {
+        manage.classList.toggle('open');
+        document.getElementById('habitManageToggle').textContent = manage.classList.contains('open') ? 'Done editing' : 'Edit habits';
+      });
+
+      const editList = document.getElementById('habitEditList');
+      const activeToday = habitsForDate(todayKey);
+      if (!activeToday.length) editList.innerHTML = '<div class="habit-empty">No active habits. Add one below.</div>';
+      activeToday.forEach(habit => {
+        const row = document.createElement('div');
+        row.className = 'habit-edit-row';
+        const input = document.createElement('input');
+        input.className = 'habit-edit-input';
+        input.value = habit.name;
+        input.setAttribute('aria-label', `Habit name: ${habit.name}`);
+        input.addEventListener('change', () => {
+          habit.name = input.value.trim() || 'Untitled habit';
+          saveData();
+          renderHabits();
+          const m = document.getElementById('habitManage'); if (m) m.classList.add('open');
+        });
+        const del = document.createElement('button');
+        del.className = 'habit-delete-btn';
+        del.textContent = 'Remove';
+        del.addEventListener('click', () => {
+          habit.archivedOn = todayKey;
+          saveData();
+          renderHabits();
+          const m = document.getElementById('habitManage'); if (m) m.classList.add('open');
+        });
+        row.append(input, del);
+        editList.appendChild(row);
+      });
+
+      const newInput = document.getElementById('newHabitName');
+      const addHabit = () => {
+        const name = newInput.value.trim();
+        if (!name) return;
+        data.habits.push({ id: cryptoId(), name, createdOn: todayKey, archivedOn: null });
+        saveData();
+        renderHabits();
+        const m = document.getElementById('habitManage'); if (m) m.classList.add('open');
+      };
+      document.getElementById('addHabitAction').addEventListener('click', addHabit);
+      newInput.addEventListener('keydown', e => { if (e.key === 'Enter') addHabit(); });
+    }
+
+
+    let lastQuoteIndex = -1;
+
+    function nextQuote() {
+      let index = Math.floor(Math.random() * MOTIVATION_QUOTES.length);
+      if (MOTIVATION_QUOTES.length > 1 && index === lastQuoteIndex) index = (index + 1 + Math.floor(Math.random() * (MOTIVATION_QUOTES.length - 1))) % MOTIVATION_QUOTES.length;
+      lastQuoteIndex = index;
+      return MOTIVATION_QUOTES[index];
+    }
+
+    function showAnotherQuote() {
+      const el = document.getElementById('quoteText');
+      if (el) el.textContent = nextQuote();
+    }
+
+    function showAnotherHomeQuote() {
+      const el = document.getElementById('homeQuoteText');
+      if (el) el.textContent = nextQuote();
+    }
+
+    function openQuoteGenerator() {
+      showAnotherQuote();
+      document.getElementById('quoteBackdrop').classList.add('open');
+    }
+    function closeQuoteGenerator() { document.getElementById('quoteBackdrop').classList.remove('open'); }
+
+    function renderHome() {
+      currentDayId = null;
+      const app = document.getElementById('app');
+      app.innerHTML = `<div class="header home-header"><div><h1>Gym</h1><p class="subtitle">Choose today's workout</p></div><div class="home-actions"><button class="home-icon-btn" id="habitsHomeBtn" aria-label="Habits" title="Habits"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg></button><button class="volume-icon-btn" id="volumeHomeBtn" aria-label="Weekly muscle sets" title="Weekly muscle sets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 19V12M12 19V5M19 19V9"/><path d="M3 19h18"/></svg></button></div></div><div class="home-quote" id="homeQuoteBtn" role="button" aria-label="Show another motivation quote"><p class="home-quote-text" id="homeQuoteText"></p><div class="home-quote-hint">tap for another</div></div><div class="habit-home-grid" id="habitHomeGrid" aria-label="Last 30 days habit completion"></div><div class="day-list" id="dayList"></div>`;
+      showAnotherHomeQuote();
+      renderHabitHomeGrid();
+      document.getElementById('homeQuoteBtn').addEventListener('click', showAnotherHomeQuote);
+      document.getElementById('habitsHomeBtn').addEventListener('click', () => openHabits());
+      document.getElementById('volumeHomeBtn').addEventListener('click', openWeeklyVolume);
+      const dayList = document.getElementById('dayList');
+      if (!data.days.length) { dayList.innerHTML = '<div class="empty">No workout days yet.<br>Use ⚙ to add one.</div>'; return; }
+      data.days.forEach(day => {
+        const btn = document.createElement('button');
+        btn.className = 'day-btn';
+        btn.innerHTML = `<span class="day-name"></span><span class="day-count">${day.exercises.length} exercise${day.exercises.length === 1 ? '' : 's'} ›</span>`;
+        btn.querySelector('.day-name').textContent = day.name;
+        btn.addEventListener('click', () => renderWorkout(day.id));
+        dayList.appendChild(btn);
+      });
+    }
+
+    function renderWorkout(dayId) {
+      currentDayId = dayId;
+      const day = data.days.find(d => d.id === dayId);
+      if (!day) return renderHome();
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="header"><button class="back-btn" id="backBtn" aria-label="Back">‹</button><div><h1 id="workoutTitle"></h1><p class="subtitle">Weight × reps</p></div></div>
+        <div id="exerciseList"></div>
+        <button class="finish-btn" id="finishWorkout">Finish workout</button>
+        <div class="finish-note">Saves today's sets. Next time, these results appear beside your new targets for comparison.</div>
+      `;
+      document.getElementById('workoutTitle').textContent = day.name;
+      document.getElementById('backBtn').addEventListener('click', renderHome);
+      const list = document.getElementById('exerciseList');
+      if (!day.exercises.length) list.innerHTML = '<div class="empty">No exercises in this workout.<br>Add some in ⚙ settings.</div>';
+      else day.exercises.forEach(ex => list.appendChild(buildExerciseCard(day, ex)));
+      document.getElementById('finishWorkout').addEventListener('click', () => finishWorkout(day.id));
+    }
+
+    function buildExerciseCard(day, ex) {
+      const cfg = exerciseConfig(ex);
+      const lib = cfg.lib;
+      const card = document.createElement('section');
+      card.className = 'exercise-card';
+      card.innerHTML = `
+        <div class="exercise-head">
+          <div><div class="exercise-title"></div><div class="exercise-meta"></div></div>
+          <div class="exercise-actions"><button class="chart-btn" aria-label="View strength chart">Chart</button><button class="info-btn" aria-label="Exercise information">i</button></div>
+        </div>
+        <div class="suggestion-slot"></div>
+        <div class="last-session-slot"></div>
+        <table class="set-table"><thead><tr><th class="set-number">Set</th><th>Weight</th><th>Reps</th><th class="flags-col">F / DS</th></tr></thead><tbody></tbody></table>
+        <div class="exercise-footer"><button class="add-set-btn">+ Set</button><button class="remove-set-btn">Remove last</button></div>
+      `;
+      card.querySelector('.exercise-title').textContent = ex.name;
+      card.querySelector('.exercise-meta').textContent = lib
+        ? `${cfg.min}–${cfg.max} reps • Primary: ${simpleMuscles(lib, 'primary').join(', ')}`
+        : `${cfg.min}–${cfg.max} reps • Custom exercise`;
+
+      card.querySelector('.info-btn').addEventListener('click', () => openExerciseDetail(ex));
+      card.querySelector('.chart-btn').addEventListener('click', () => openStrengthChart(day, ex));
+
+      const prev = lastSession(day.id, ex.id);
+      const rec = recommendNext(day, ex);
+      if (rec) {
+        const slot = card.querySelector('.suggestion-slot');
+        slot.innerHTML = `<div class="suggestion ${rec.kind === 'reduce' ? 'warn' : ''}"><div class="suggestion-title">Suggested next time</div><div class="suggestion-main"></div><div class="suggestion-note"></div></div>`;
+        slot.querySelector('.suggestion-main').textContent = rec.main;
+        slot.querySelector('.suggestion-note').textContent = rec.note;
+      }
+
+      if (prev && Array.isArray(prev.sets) && prev.sets.length) {
+        const lastSlot = card.querySelector('.last-session-slot');
+        const strip = document.createElement('div');
+        strip.className = 'last-session';
+        strip.innerHTML = `<div class="last-session-label">Last · ${escapeXml(formatDateShort(prev.date))}</div><div class="last-session-sets"></div>`;
+        const setsWrap = strip.querySelector('.last-session-sets');
+        prev.sets.forEach((set, index) => {
+          const chip = document.createElement('div');
+          chip.className = 'last-set-chip';
+          const flags = `${set.failure ? '<span class="last-mini-flag failure">F</span>' : ''}${set.dropset ? '<span class="last-mini-flag dropset">DS</span>' : ''}`;
+          chip.innerHTML = `<span class="last-set-number">${index + 1}</span><span class="last-set-value">${formatWeight(Number(set.weight))}×${Number(set.reps) || '—'}</span>${flags}`;
+          setsWrap.appendChild(chip);
+        });
+        lastSlot.appendChild(strip);
+      }
+
+      const tbody = card.querySelector('tbody');
+      const sets = exerciseSets(day.id, ex.id);
+      const redrawRows = () => {
+        tbody.innerHTML = '';
+        sets.forEach((set, index) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="set-number">${index + 1}</td>
+            <td><input class="set-input weight-input" inputmode="decimal" placeholder="kg" aria-label="Weight for set ${index + 1}"></td>
+            <td><input class="set-input reps-input" inputmode="numeric" placeholder="reps" aria-label="Reps for set ${index + 1}"></td>
+            <td><div class="set-flags"><button class="flag-btn failure-btn ${set.failure ? 'active' : ''}" aria-label="Toggle failure for set ${index + 1}">F</button><button class="flag-btn dropset-btn ${set.dropset ? 'active' : ''}" aria-label="Toggle drop set for set ${index + 1}">DS</button></div></td>`;
+          const weight = row.querySelector('.weight-input');
+          const reps = row.querySelector('.reps-input');
+          const failure = row.querySelector('.failure-btn');
+          const dropset = row.querySelector('.dropset-btn');
+          weight.value = set.weight;
+          reps.value = set.reps;
+          weight.addEventListener('input', () => { set.weight = weight.value; saveData(); });
+          reps.addEventListener('input', () => { set.reps = reps.value; saveData(); });
+          failure.addEventListener('click', () => { set.failure = !set.failure; failure.classList.toggle('active', set.failure); saveData(); });
+          dropset.addEventListener('click', () => { set.dropset = !set.dropset; dropset.classList.toggle('active', set.dropset); saveData(); });
+          tbody.appendChild(row);
+        });
+      };
+      card.querySelector('.add-set-btn').addEventListener('click', () => { sets.push({weight:'',reps:'',failure:false,dropset:false}); saveData(); redrawRows(); });
+      card.querySelector('.remove-set-btn').addEventListener('click', () => { if (sets.length > 1) { sets.pop(); saveData(); redrawRows(); } });
+      redrawRows();
+      return card;
+    }
+
+    function finishWorkout(dayId) {
+      const day = data.days.find(d => d.id === dayId);
+      if (!day) return;
+      const log = dayLog(dayId);
+      const hasAnything = day.exercises.some(ex => completedSets(log[ex.id] || []).length > 0);
+      if (!hasAnything) { alert('Enter at least one completed set before finishing the workout.'); return; }
+      if (!data.history[dayId]) data.history[dayId] = {};
+      const timestamp = new Date().toISOString();
+      day.exercises.forEach(ex => {
+        const sets = log[ex.id] || [];
+        const completed = completedSets(sets);
+        if (!completed.length) return;
+        if (!data.history[dayId][ex.id]) data.history[dayId][ex.id] = [];
+        data.history[dayId][ex.id].push({
+          date: timestamp,
+          sets: completed.map(s => ({ weight: s.weight, reps: s.reps, failure: s.failure, dropset: s.dropset }))
+        });
+        if (data.history[dayId][ex.id].length > 30) data.history[dayId][ex.id].shift();
+        log[ex.id] = Array.from({length: completed.length}, () => ({weight:'',reps:'',failure:false,dropset:false}));
+      });
+      saveData();
+      renderWorkout(dayId);
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function openSettings() { renderSettings(); document.getElementById('settingsBackdrop').classList.add('open'); }
+    function closeSettings() { document.getElementById('settingsBackdrop').classList.remove('open'); if (currentDayId) renderWorkout(currentDayId); else renderHome(); }
+
+    function renderSettings() {
+      const wrap = document.getElementById('settingsContent');
+      wrap.innerHTML = '';
+      if (!data.days.length) wrap.innerHTML = '<div class="empty" style="margin-bottom:12px">Add your first workout day below.</div>';
+
+      data.days.forEach(day => {
+        const card = document.createElement('div');
+        card.className = 'settings-card';
+        const top = document.createElement('div');
+        top.className = 'settings-row';
+        top.innerHTML = `<input class="settings-input day-name-input" aria-label="Workout day name"><button class="danger-btn delete-day-btn">Delete</button>`;
+        const dayInput = top.querySelector('.day-name-input');
+        dayInput.value = day.name;
+        dayInput.addEventListener('input', () => { day.name = dayInput.value || 'Untitled workout'; saveData(); });
+        top.querySelector('.delete-day-btn').addEventListener('click', () => {
+          data.days = data.days.filter(d => d.id !== day.id); delete data.logs[day.id]; delete data.history[day.id]; if (currentDayId === day.id) currentDayId = null; saveData(); renderSettings();
+        });
+        card.appendChild(top);
+
+        const label = document.createElement('div'); label.className = 'section-label'; label.textContent = 'Exercises'; card.appendChild(label);
+        const exerciseWrap = document.createElement('div'); exerciseWrap.className = 'exercise-settings';
+        day.exercises.forEach(ex => {
+          const cfg = exerciseConfig(ex);
+          const row = document.createElement('div');
+          row.innerHTML = `
+            <div class="settings-row">
+              <input class="settings-input exercise-name-input" aria-label="Exercise name">
+              <button class="small-btn info-setting-btn">i</button>
+              <button class="small-btn remove-exercise-btn">×</button>
+            </div>
+            <div class="settings-row">
+              <input class="settings-input settings-number min-input" inputmode="numeric" aria-label="Minimum reps" placeholder="Min">
+              <span style="color:var(--muted)">to</span>
+              <input class="settings-input settings-number max-input" inputmode="numeric" aria-label="Maximum reps" placeholder="Max">
+              <input class="settings-input settings-number inc-input" inputmode="decimal" aria-label="Weight increment" placeholder="kg step">
+            </div>`;
+          const exInput = row.querySelector('.exercise-name-input'); exInput.value = ex.name;
+          exInput.addEventListener('change', () => {
+            ex.name = exInput.value || 'Untitled exercise';
+            const matched = matchLibrary(ex.name);
+            ex.libraryId = matched ? matched.id : null;
+            if (matched) ex.increment = matched.increment;
+            saveData(); renderSettings();
+          });
+          const minInput = row.querySelector('.min-input'); const maxInput = row.querySelector('.max-input'); const incInput = row.querySelector('.inc-input');
+          minInput.value = cfg.min; maxInput.value = cfg.max; incInput.value = cfg.increment;
+          minInput.addEventListener('change', () => { const v = Number(minInput.value); ex.customMin = Number.isFinite(v) && v > 0 ? v : null; saveData(); renderSettings(); });
+          maxInput.addEventListener('change', () => { const v = Number(maxInput.value); ex.customMax = Number.isFinite(v) && v > 0 ? v : null; saveData(); renderSettings(); });
+          incInput.addEventListener('change', () => { const v = Number(incInput.value); if (Number.isFinite(v) && v >= 0) ex.increment = v; saveData(); renderSettings(); });
+          row.querySelector('.info-setting-btn').addEventListener('click', () => openExerciseDetail(ex));
+          row.querySelector('.remove-exercise-btn').addEventListener('click', () => {
+            day.exercises = day.exercises.filter(e => e.id !== ex.id); if (data.logs[day.id]) delete data.logs[day.id][ex.id]; if (data.history[day.id]) delete data.history[day.id][ex.id]; saveData(); renderSettings();
+          });
+          exerciseWrap.appendChild(row);
+        });
+
+        const actions = document.createElement('div'); actions.className = 'picker-actions';
+        const addLibrary = document.createElement('button'); addLibrary.className = 'small-btn'; addLibrary.textContent = '+ From library';
+        addLibrary.addEventListener('click', () => { pickerDayId = day.id; openLibrary('pick'); });
+        const addCustom = document.createElement('button'); addCustom.className = 'small-btn'; addCustom.textContent = '+ Custom';
+        addCustom.addEventListener('click', () => { day.exercises.push({id:cryptoId(),name:'New Exercise',libraryId:null,increment:2.5,customMin:6,customMax:12}); saveData(); renderSettings(); });
+        actions.append(addLibrary, addCustom); exerciseWrap.appendChild(actions);
+        card.appendChild(exerciseWrap); wrap.appendChild(card);
+      });
+    }
+
+    function openLibrary(mode = 'browse') {
+      libraryMode = mode;
+      document.getElementById('libraryTitle').textContent = mode === 'pick' ? 'Choose exercise' : 'Exercise library';
+      renderLibraryList('');
+      document.getElementById('libraryBackdrop').classList.add('open');
+    }
+
+    function closeLibrary() { document.getElementById('libraryBackdrop').classList.remove('open'); libraryMode = 'browse'; pickerDayId = null; }
+
+    function renderLibraryList(query) {
+      const content = document.getElementById('libraryContent');
+      content.innerHTML = `<input class="library-search" id="librarySearch" placeholder="Search exercises or muscles"><div class="library-list" id="libraryList"></div>`;
+      const search = content.querySelector('#librarySearch'); search.value = query;
+      search.addEventListener('input', () => renderLibraryResults(search.value));
+      renderLibraryResults(query);
+      setTimeout(() => { if (libraryMode === 'pick') search.focus(); }, 50);
+    }
+
+    function renderLibraryResults(query) {
+      const list = document.getElementById('libraryList');
+      if (!list) return;
+      const q = normalizeName(query);
+      const matches = EXERCISE_LIBRARY.filter(item => {
+        const hay = normalizeName([item.name,item.category,...item.primary,...item.secondary,...simpleMuscles(item,'primary'),...simpleMuscles(item,'secondary'),...(item.aliases||[])].join(' '));
+        return !q || hay.includes(q);
+      });
+      list.innerHTML = '';
+      if (!matches.length) { list.innerHTML = '<div class="empty">No matching exercises.</div>'; return; }
+      matches.forEach(item => {
+        const btn = document.createElement('button'); btn.className = 'library-item';
+        btn.innerHTML = `<div class="library-item-name"></div><div class="library-item-meta"></div>`;
+        btn.querySelector('.library-item-name').textContent = item.name;
+        btn.querySelector('.library-item-meta').textContent = `${item.min}–${item.max} reps • ${item.category} • Primary: ${simpleMuscles(item, 'primary').join(', ')}`;
+        btn.addEventListener('click', () => {
+          if (libraryMode === 'pick') addLibraryExerciseToDay(item);
+          else showLibraryDetail(item);
+        });
+        list.appendChild(btn);
+      });
+    }
+
+    function addLibraryExerciseToDay(item) {
+      const day = data.days.find(d => d.id === pickerDayId);
+      if (!day) return closeLibrary();
+      day.exercises.push({id:cryptoId(),name:item.name,libraryId:item.id,increment:item.increment,customMin:null,customMax:null});
+      saveData(); closeLibrary(); renderSettings();
+    }
+
+    function openExerciseDetail(ex) {
+      const lib = getLibraryForExercise(ex);
+      document.getElementById('libraryTitle').textContent = ex.name;
+      const content = document.getElementById('libraryContent');
+      if (!lib) {
+        const cfg = exerciseConfig(ex);
+        content.innerHTML = `<div class="detail-card"><div class="detail-label">Custom exercise</div><div class="detail-value">Working range: ${cfg.min}–${cfg.max} reps</div><div class="evidence-note">This exercise is not matched to the built-in library, so primary and secondary muscle information is not assigned automatically.</div></div>`;
+      } else renderDetailContent(content, lib, ex);
+      document.getElementById('libraryBackdrop').classList.add('open');
+    }
+
+    function showLibraryDetail(lib) {
+      document.getElementById('libraryTitle').textContent = lib.name;
+      const content = document.getElementById('libraryContent');
+      renderDetailContent(content, lib, null);
+    }
+
+    function renderDetailContent(content, lib, ex) {
+      const cfg = ex ? exerciseConfig(ex) : {min:lib.min,max:lib.max,increment:lib.increment};
+      content.innerHTML = `
+        <div class="detail-card"><div class="detail-label">Practical hypertrophy range</div><div class="detail-value">${cfg.min}–${cfg.max} reps per working set</div><div class="evidence-note">This is a practical progression range for this exercise, not a claim that muscle only grows inside these exact reps.</div></div>
+        <div class="detail-card"><div class="detail-label">Primary muscles</div><div class="detail-value" id="primaryMuscles"></div></div>
+        <div class="detail-card"><div class="detail-label">Secondary muscles</div><div class="detail-value" id="secondaryMuscles"></div></div>
+        <div class="detail-card"><div class="detail-label">Default weight step</div><div class="detail-value">${formatWeight(cfg.increment)} kg</div></div>
+        <div class="detail-card"><div class="detail-label">Training note</div><div class="detail-value" id="trainingNote"></div></div>
+        <button class="small-btn" style="width:100%" id="backToLibrary">← Back to library</button>`;
+      const primarySimple = simpleMuscles(lib, 'primary');
+      const secondarySimple = simpleMuscles(lib, 'secondary');
+      content.querySelector('#primaryMuscles').textContent = primarySimple.length ? primarySimple.join(', ') : '—';
+      content.querySelector('#secondaryMuscles').textContent = secondarySimple.length ? secondarySimple.join(', ') : '—';
+      content.querySelector('#trainingNote').textContent = lib.note;
+      content.querySelector('#backToLibrary').addEventListener('click', () => { document.getElementById('libraryTitle').textContent = 'Exercise library'; libraryMode = 'browse'; renderLibraryList(''); });
+    }
+
+    document.getElementById('settingsFab').addEventListener('click', openSettings);
+    document.getElementById('libraryFab').addEventListener('click', () => openLibrary('browse'));
+    document.getElementById('closeSettings').addEventListener('click', closeSettings);
+    document.getElementById('closeLibrary').addEventListener('click', closeLibrary);
+    document.getElementById('closeStrength').addEventListener('click', closeStrengthChart);
+    document.getElementById('closeVolume').addEventListener('click', closeWeeklyVolume);
+    document.getElementById('closeHabits').addEventListener('click', closeHabits);
+    document.getElementById('closeQuote').addEventListener('click', closeQuoteGenerator);
+    document.getElementById('newQuoteBtn').addEventListener('click', showAnotherQuote);
+    document.getElementById('settingsBackdrop').addEventListener('click', e => { if (e.target.id === 'settingsBackdrop') closeSettings(); });
+    document.getElementById('libraryBackdrop').addEventListener('click', e => { if (e.target.id === 'libraryBackdrop') closeLibrary(); });
+    document.getElementById('strengthBackdrop').addEventListener('click', e => { if (e.target.id === 'strengthBackdrop') closeStrengthChart(); });
+    document.getElementById('volumeBackdrop').addEventListener('click', e => { if (e.target.id === 'volumeBackdrop') closeWeeklyVolume(); });
+    document.getElementById('habitsBackdrop').addEventListener('click', e => { if (e.target.id === 'habitsBackdrop') closeHabits(); });
+    document.getElementById('quoteBackdrop').addEventListener('click', e => { if (e.target.id === 'quoteBackdrop') closeQuoteGenerator(); });
+    document.getElementById('addDayBtn').addEventListener('click', () => { data.days.push({id:cryptoId(),name:'New Workout',exercises:[]}); saveData(); renderSettings(); });
+
+    saveData();
+    renderHome();
+  </script>
+</body>
+</html>

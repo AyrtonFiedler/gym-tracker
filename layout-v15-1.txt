@@ -1,0 +1,70 @@
+  }
+
+  function buildWorkoutRow(day, ex, maxSets) {
+    const cfg = exerciseConfig(ex);
+    const sets = exerciseSets(day.id, ex.id);
+    const prev = lastSession(day.id, ex.id);
+    const rec = recommendNext(day, ex);
+    const row = document.createElement('tr');
+
+    const exCell = document.createElement('td');
+    exCell.className = 'sheet-exercise-cell';
+    const exName = document.createElement('div');
+    exName.className = 'sheet-ex-name';
+    exName.textContent = ex.name;
+    const meta = document.createElement('div');
+    meta.className = 'sheet-ex-meta';
+    const primary = cfg.lib ? simpleMuscles(cfg.lib, 'primary').join(', ') : 'Custom';
+    meta.textContent = `${cfg.loadType === 'assistance' ? 'Assist kg' : 'kg'} · ${primary}${prev ? ` · Last ${formatDateShort(prev.date)}` : ''}`;
+    const tools = document.createElement('div');
+    tools.className = 'sheet-ex-tools';
+    const info = document.createElement('button');
+    info.className = 'sheet-tiny-btn'; info.textContent = 'i'; info.title = 'Exercise info';
+    const chart = document.createElement('button');
+    chart.className = 'sheet-tiny-btn'; chart.textContent = 'Chart'; chart.title = 'Strength chart';
+    info.addEventListener('click', () => openExerciseDetail(ex));
+    chart.addEventListener('click', () => openStrengthChart(day, ex));
+    tools.append(info, chart);
+    exCell.append(exName, meta, tools);
+    row.appendChild(exCell);
+
+    row.appendChild(buildWarmCell(day, ex, cfg, prev));
+
+    for (let i = 0; i < maxSets; i++) {
+      if (i < sets.length) {
+        row.appendChild(buildSetCell(day, ex, cfg, sets[i], i, prev?.sets?.[i]));
+      } else {
+        const blank = document.createElement('td');
+        blank.className = 'sheet-set-cell';
+        blank.innerHTML = '<div style="color:#aaa;font-size:11px">—</div>';
+        row.appendChild(blank);
+      }
+    }
+
+    const aim = document.createElement('td');
+    aim.className = 'sheet-aim-cell';
+    const aimInfo = compactAim(rec, cfg);
+    const aimBtn = document.createElement('button');
+    aimBtn.className = `sheet-aim-btn ${rec ? 'has-rec' : ''}`;
+    if (rec) {
+      const kind = document.createElement('span');
+      kind.className = 'sheet-aim-kind';
+      kind.textContent = aimInfo.kind;
+      const label = document.createElement('span');
+      label.textContent = aimInfo.label;
+      aimBtn.append(kind, label);
+      aimBtn.addEventListener('click', () => alert(`${rec.title}\n${rec.main}\n\n${rec.note}`));
+      aimBtn.setAttribute('aria-label', `Coach suggestion: ${rec.main}. Tap for details.`);
+    } else {
+      aimBtn.textContent = '—';
+      aimBtn.disabled = true;
+    }
+    aim.appendChild(aimBtn);
+    row.appendChild(aim);
+
+    const rir = document.createElement('td');
+    rir.className = 'sheet-rir-cell';
+    const rirInput = document.createElement('input');
+    rirInput.className = 'sheet-rir-input';
+    rirInput.placeholder = '—';
+    rirInput.value = ex.targetRir || '';

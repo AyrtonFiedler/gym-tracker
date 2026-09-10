@@ -1,0 +1,360 @@
+/* V16 — notebook workout sheet */
+:root {
+  --nb-paper: #fbf7ed;
+  --nb-ink: #24211d;
+  --nb-muted: #7c756c;
+  --nb-line: rgba(91, 128, 158, .18);
+  --nb-grid: #c9c0b4;
+  --nb-red: rgba(195, 76, 66, .34);
+  --nb-aim: #f3d3bb;
+  --nb-aim-strong: #e8a97d;
+}
+
+body.workout-active { background: #e9e3d8; }
+body.workout-active .settings-fab,
+body.workout-active .library-fab { display: none; }
+
+.workout-notebook {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+}
+
+.workout-topbar {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  margin: -3px 0 6px;
+}
+.workout-topbar .back-btn { justify-self: start; }
+.workout-topbar h1 {
+  margin: 0;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: -.7px;
+}
+.workout-menu-btn {
+  justify-self: end;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--nb-ink);
+}
+
+.workout-date {
+  text-align: right;
+  margin: 0 2px 2px;
+  color: var(--nb-muted);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.workout-mini-quote {
+  position: relative;
+  margin: 5px 0 14px 10px;
+  padding: 7px 8px 7px 13px;
+  max-width: 92%;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.25;
+  color: #3b3630;
+}
+.workout-mini-quote::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 1px;
+  bottom: 1px;
+  width: 2px;
+  background: var(--nb-red);
+}
+
+.notebook-sheet-wrap {
+  width: calc(100% + 12px);
+  margin-left: -6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  border-top: 1px solid #aaa094;
+  border-bottom: 1px solid #aaa094;
+  background: rgba(251,247,237,.34);
+}
+.notebook-sheet-wrap::-webkit-scrollbar { display:none; }
+
+.notebook-sheet {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: max-content;
+  min-width: 100%;
+  color: var(--nb-ink);
+}
+.notebook-sheet th,
+.notebook-sheet td {
+  border-right: 1px solid var(--nb-grid);
+  border-bottom: 1px solid var(--nb-grid);
+  text-align: center;
+  vertical-align: middle;
+  padding: 4px 2px;
+  background: rgba(251,247,237,.86);
+}
+.notebook-sheet th:last-child,
+.notebook-sheet td:last-child { border-right:0; }
+.notebook-sheet tbody tr:last-child td { border-bottom:0; }
+.notebook-sheet thead th {
+  height: 34px;
+  background: rgba(251,247,237,.94);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.nb-ex-col, .nb-ex-cell {
+  width: 76px;
+  min-width: 76px;
+  max-width: 76px;
+  position: sticky;
+  left: 0;
+}
+.nb-ex-col { z-index: 6; }
+.nb-ex-cell {
+  z-index: 4;
+  background: var(--nb-paper) !important;
+  text-align: left !important;
+  padding: 5px 5px !important;
+  box-shadow: 1px 0 0 var(--nb-grid);
+}
+.nb-ex-name {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 10.5px;
+  line-height: 1.05;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.nb-ex-actions {
+  display:flex;
+  gap:2px;
+  margin-top:5px;
+}
+.nb-mini-action {
+  border:0;
+  border-bottom:1px solid #aaa095;
+  background:transparent;
+  padding:0;
+  min-width:14px;
+  width:14px;
+  height:16px;
+  font-size:7px;
+  color:#6b645d;
+  cursor:pointer;
+}
+
+.nb-warm-col, .nb-warm-cell { width:41px; min-width:41px; max-width:41px; }
+.nb-set-col, .nb-set-cell { width:42px; min-width:42px; max-width:42px; }
+.nb-aim-col, .nb-aim-cell { width:66px; min-width:66px; max-width:66px; }
+.nb-range-col, .nb-range-cell { width:43px; min-width:43px; max-width:43px; }
+.nb-aim-col, .nb-aim-cell { background: var(--nb-aim) !important; }
+
+.nb-pair {
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:1px;
+  justify-items:center;
+}
+.nb-pair-row {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 5px minmax(0,1fr);
+  align-items:center;
+  width:100%;
+}
+.nb-input {
+  width:100%;
+  min-width:0;
+  height:25px;
+  padding:0;
+  border:0;
+  border-bottom:1px solid #a69c90;
+  border-radius:0;
+  background:transparent;
+  text-align:center;
+  color:var(--nb-ink);
+  font-family:Georgia, "Times New Roman", serif;
+  font-size:10px;
+  outline:none;
+}
+.nb-input:focus { background:rgba(255,255,255,.65); border-bottom-color:#2b2926; }
+.nb-slash { font-size:9px; color:#746d65; }
+
+.nb-flags {
+  min-height:17px;
+  margin-top:2px;
+  display:flex;
+  justify-content:center;
+  gap:2px;
+}
+.nb-flag {
+  min-width:19px;
+  height:17px;
+  padding:0 2px;
+  border:1px solid #b9afa3;
+  border-radius:2px;
+  background:transparent;
+  font-size:7px;
+  font-weight:800;
+  color:#756e66;
+  cursor:pointer;
+}
+.nb-flag.active { background:#26231f; color:#fff; border-color:#26231f; }
+.nb-flag.ds.active { background:#6c645b; border-color:#6c645b; }
+.nb-warm-label { color:#8b8176; font-size:7px; font-weight:800; margin-top:2px; }
+.nb-last { min-height:10px; margin-top:2px; color:#8c8379; font-size:7px; white-space:nowrap; }
+.nb-last strong { color:#5f5851; font-weight:700; }
+
+.nb-aim-button {
+  width:100%;
+  min-height:49px;
+  border:0;
+  background:transparent;
+  padding:2px 1px;
+  cursor:pointer;
+  color:var(--nb-ink);
+}
+.nb-aim-button:disabled { cursor:default; }
+.nb-aim-weight {
+  display:block;
+  font-family:Georgia, "Times New Roman", serif;
+  font-size:10.5px;
+  font-weight:700;
+  line-height:1.05;
+}
+.nb-aim-reps {
+  display:block;
+  margin-top:3px;
+  font-family:Georgia, "Times New Roman", serif;
+  font-size:9px;
+  font-weight:700;
+  line-height:1.05;
+  letter-spacing:.15px;
+}
+.nb-aim-tag {
+  display:block;
+  margin-top:3px;
+  color:#86634b;
+  font-size:6.5px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.45px;
+}
+.nb-range-cell {
+  font-family:Georgia, "Times New Roman", serif;
+  font-size:9.5px;
+  font-weight:700;
+}
+
+.nb-add-exercise {
+  width:100%;
+  min-height:42px;
+  border:0;
+  border-bottom:1px solid #bdb4a6;
+  background:transparent;
+  text-align:left;
+  padding:8px 5px;
+  font-family:Georgia, "Times New Roman", serif;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+}
+.nb-footer-quote {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:17px 8px 18px;
+  color:#4c4640;
+  font-family:Georgia, "Times New Roman", serif;
+  font-size:15px;
+  font-style:italic;
+}
+.nb-flex-mark {
+  font-size:30px;
+  font-style:normal;
+  filter:grayscale(1);
+}
+.nb-finish {
+  width:min(230px, 76%);
+  display:block;
+  margin:0 auto 18px;
+  border:0;
+  border-radius:5px;
+  min-height:48px;
+  background:#23211e;
+  color:#fff;
+  font-family:Georgia, "Times New Roman", serif;
+  font-size:16px;
+  font-style:italic;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.nb-settings-extra {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:6px;
+  margin:4px 0 11px;
+}
+.nb-setting-field {
+  display:grid;
+  grid-template-columns:auto 76px;
+  align-items:center;
+  gap:8px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:750;
+  text-transform:uppercase;
+  letter-spacing:.35px;
+}
+.nb-setting-field input {
+  width:100%;
+  height:32px;
+  border:0;
+  border-bottom:1px solid #91887b;
+  background:transparent;
+  text-align:center;
+  font-size:14px;
+  outline:none;
+}
+
+/* Keep AIM and R-Aim visible while extra set columns slide underneath. */
+.nb-aim-col,
+.nb-aim-cell {
+  position: sticky;
+  right: 43px;
+  z-index: 5;
+  box-shadow: -1px 0 0 var(--nb-grid);
+}
+.nb-range-col,
+.nb-range-cell {
+  position: sticky;
+  right: 0;
+  z-index: 5;
+  background: var(--nb-paper) !important;
+  box-shadow: -1px 0 0 var(--nb-grid);
+}
+.notebook-sheet thead .nb-aim-col,
+.notebook-sheet thead .nb-range-col { z-index: 8; }
+
+@media (max-width:380px) {
+  .nb-ex-col,.nb-ex-cell { width:72px; min-width:72px; max-width:72px; }
+  .nb-warm-col,.nb-warm-cell { width:39px; min-width:39px; max-width:39px; }
+  .nb-set-col,.nb-set-cell { width:40px; min-width:40px; max-width:40px; }
+  .nb-aim-col,.nb-aim-cell { width:64px; min-width:64px; max-width:64px; right:42px; }
+  .nb-range-col,.nb-range-cell { width:42px; min-width:42px; max-width:42px; }
+}

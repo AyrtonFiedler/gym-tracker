@@ -1,0 +1,69 @@
+/* V17 — notebook UI from approved mockup */
+:root{
+  --v17-paper:#fbf8ee;
+  --v17-paper2:#f7f2e7;
+  --v17-ink:#171714;
+  --v17-muted:#6e695f;
+  --v17-rule:rgba(96,137,163,.16);
+  --v17-margin:rgba(224,92,76,.58);
+  --v17-grid:#aeb8ba;
+  --v17-peach:#f8dcc7;
+  --v17-peach2:#fde9d8;
+  --v17-green:#42b657;
+  --v17-soft:#ebe8df;
+}
+html,body{background:#171717!important;color:var(--v17-ink);}
+body{min-height:100vh;}
+#settingsFab,#libraryFab{display:none!important;}
+.app{
+  width:min(100%,460px)!important;
+  min-height:100vh!important;
+  margin:0 auto!important;
+  padding:0!important;
+  background-color:var(--v17-paper)!important;
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,var(--v17-rule) 31px,var(--v17-rule) 32px)!important;
+  border:0!important;
+  box-shadow:0 0 32px rgba(0,0,0,.28)!important;
+  position:relative!important;
+  overflow-x:hidden;
+}
+.app::before{content:"";position:fixed;z-index:0;top:0;bottom:0;width:1px;margin-left:24px;background:var(--v17-margin);pointer-events:none;}
+.v17-page{position:relative;z-index:1;min-height:100vh;padding:12px 13px calc(30px + env(safe-area-inset-bottom,0px)) 34px;}
+.v17-page button,.v17-page input,.v17-page textarea,.v17-page select{font:inherit;color:inherit;}
+.v17-hand{font-family:"Marker Felt","Bradley Hand","Segoe Print","Comic Sans MS",cursive;}
+.v17-system{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;}
+.v17-topbar{height:48px;display:grid;grid-template-columns:92px 1fr 92px;align-items:center;border-bottom:1px solid rgba(45,45,40,.08);margin-bottom:4px;}
+.v17-title{text-align:center;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:24px;line-height:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.v17-nav-left,.v17-nav-right{border:0;background:transparent;padding:8px 2px;font-size:17px;cursor:pointer;min-height:40px;}
+.v17-nav-left{text-align:left;}.v17-nav-right{text-align:right;}
+.v17-icon-btn{border:0;background:transparent;padding:6px;font-size:23px;cursor:pointer;}
+.v17-quote-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;padding:7px 5px 16px 10px;border-left:2px solid var(--v17-margin);margin:8px 0 4px;min-height:72px;}
+.v17-quote{font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:17px;line-height:1.25;font-style:italic;max-width:240px;}
+.v17-date{font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:14px;white-space:nowrap;padding-top:1px;}
+
+/* workout sheet */
+.v17-workout-scroll{width:calc(100% + 47px);margin-left:-34px;overflow-x:auto;-webkit-overflow-scrolling:touch;border-top:1px solid #9ea9aa;border-bottom:1px solid #9ea9aa;background:rgba(251,248,238,.76);scrollbar-width:none;}
+.v17-workout-scroll::-webkit-scrollbar{display:none;}
+.v17-workout-table{border-collapse:collapse;table-layout:fixed;min-width:100%;width:max-content;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:12px;background:rgba(251,248,238,.84);}
+.v17-workout-table th,.v17-workout-table td{border-right:1px solid var(--v17-grid);border-bottom:1px solid var(--v17-grid);padding:5px 2px;text-align:center;vertical-align:middle;height:42px;}
+.v17-workout-table th{height:34px;font-weight:500;font-size:12px;background:rgba(251,248,238,.97);}
+.v17-workout-table tr:last-child td{border-bottom:0}.v17-workout-table th:last-child,.v17-workout-table td:last-child{border-right:0}
+.v17-ex-col{width:82px;min-width:82px;max-width:82px;position:sticky;left:0;z-index:4;background:var(--v17-paper)!important;text-align:left!important;padding-left:7px!important;box-shadow:1px 0 0 var(--v17-grid);}
+.v17-workout-table th.v17-ex-col{text-align:center!important;z-index:6;}
+.v17-warm-col{width:42px;min-width:42px;max-width:42px}.v17-set-col{width:44px;min-width:44px;max-width:44px}.v17-aim-col{width:76px;min-width:76px;max-width:76px;background:var(--v17-peach)!important}.v17-raim-col{width:52px;min-width:52px;max-width:52px}
+.v17-ex-name{display:block;border:0;background:transparent;text-align:left;padding:0;font:inherit;font-size:13px;line-height:1.08;cursor:pointer;width:100%;}
+.v17-cell-pair{display:flex;align-items:center;justify-content:center;gap:0;white-space:nowrap;}
+.v17-cell-input{width:19px;border:0;background:transparent;padding:0;text-align:center;outline:0;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:11px;line-height:1.1;}
+.v17-cell-input.v17-weight{width:25px}.v17-cell-input::placeholder{color:#8b8881;opacity:.58}.v17-cell-slash{font-size:10px;margin:0 1px;color:#4c4a46}
+.v17-aim-button{width:100%;border:0;background:transparent;padding:0 1px;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:10.5px;line-height:1.16;cursor:pointer;}
+.v17-aim-button strong{font-weight:600}.v17-aim-empty{opacity:.45}
+.v17-raim{font-size:11px;white-space:nowrap;}
+.v17-add-ex{display:flex;align-items:center;gap:7px;width:100%;border:0;border-bottom:1px solid rgba(52,52,46,.15);background:transparent;padding:11px 6px;text-align:left;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:16px;cursor:pointer;}
+.v17-workout-footer{padding:22px 8px 0;text-align:center;}
+.v17-arm-note{display:flex;align-items:center;justify-content:center;gap:14px;min-height:115px;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:17px;font-style:italic;}
+.v17-arm-svg{width:72px;height:72px;fill:none;stroke:#171714;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.v17-primary{display:block;width:min(230px,80%);margin:0 auto;border:0;border-radius:8px;background:#171717;color:#fff!important;padding:12px 16px;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:17px;cursor:pointer;box-shadow:none;}
+.v17-small-note{text-align:center;color:var(--v17-muted);font-size:10px;margin-top:8px;line-height:1.35;}
+
+/* list pages */
+.v17-list{margin-top:5px;border-top:1px solid rgba(40,40,35,.12);}

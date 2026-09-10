@@ -1,0 +1,51 @@
+    document.getElementById('tb').replaceWith(topbar(day.name,'‹ Back','⋮',showWorkouts,()=>showWorkoutManager(day.id)));
+    const body=document.getElementById('workbody');
+    day.exercises.forEach(ex=>{
+      const cfg=exerciseConfig(ex), sets=exerciseSets(day.id,ex.id), prev=lastSession(day.id,ex.id), warm=warmupFor(day.id,ex.id), aim=aimParts(day,ex);
+      const tr=document.createElement('tr');
+      const name=document.createElement('td'); name.className='v17-ex-col'; const nb=document.createElement('button'); nb.className='v17-ex-name'; nb.textContent=ex.name; nb.onclick=()=>showExerciseEditor(day.id,ex.id); name.appendChild(nb); tr.appendChild(name);
+      const wt=document.createElement('td'); wt.className='v17-warm-col'; wt.appendChild(makeInlinePair(warm,cfg,prev?.warmup,true)); tr.appendChild(wt);
+      for(let i=0;i<maxSets;i++){
+        const td=document.createElement('td'); td.className='v17-set-col';
+        if(i<sets.length) td.appendChild(makeInlinePair(sets[i],cfg,prev?.sets?.[i],false)); else td.textContent='–';
+        tr.appendChild(td);
+      }
+      const at=document.createElement('td'); at.className='v17-aim-col'; const ab=document.createElement('button'); ab.className='v17-aim-button'; ab.innerHTML=aim.rec?`<strong>${esc(aim.compact)}</strong>`:'<span class="v17-aim-empty">—</span>'; if(aim.rec) ab.onclick=()=>alert(`${aim.rec.title}\n${aim.rec.main}\n\n${aim.rec.note}`); at.appendChild(ab); tr.appendChild(at);
+      const rt=document.createElement('td'); rt.className='v17-raim-col v17-raim'; rt.textContent=`${cfg.min}-${cfg.max}`; tr.appendChild(rt);
+      body.appendChild(tr);
+    });
+    document.getElementById('addEx').onclick=()=>showLibrary(day.id);
+    document.getElementById('finish').onclick=()=>finishV17(day.id);
+  }
+
+  function finishV17(dayId){
+    const day=getDay(dayId); if(!day)return;
+    const log=dayLog(dayId); const has=day.exercises.some(ex=>completedSets(log[ex.id]||[]).length>0); if(!has){alert('Enter at least one completed working set first.');return;}
+    if(!data.history[dayId])data.history[dayId]={}; const stamp=new Date().toISOString();
+    day.exercises.forEach(ex=>{
+      const sets=log[ex.id]||[], completed=completedSets(sets), warm=warmupFor(dayId,ex.id);
+      if(completed.length){
+        if(!data.history[dayId][ex.id])data.history[dayId][ex.id]=[];
+        const ww=Number(warm.weight),rr=Number(warm.reps); const warmup=Number.isFinite(ww)&&ww>=0&&Number.isFinite(rr)&&rr>0?{weight:ww,reps:rr}:null;
+        data.history[dayId][ex.id].push({date:stamp,warmup,sets:completed.map(s=>({weight:s.weight,reps:s.reps,failure:s.failure,dropset:s.dropset}))});
+        if(data.history[dayId][ex.id].length>30)data.history[dayId][ex.id].shift();
+      }
+      log[ex.id]=Array.from({length:Math.max(1,ex.defaultSets||completed.length||sets.length||1)},emptySet); warmupsForDay(dayId)[ex.id]={weight:'',reps:''};
+    });
+    saveData(); showWorkout(dayId);
+  }
+
+  function showExerciseEditor(dayId,exId){
+    const day=getDay(dayId),ex=getEx(day,exId); if(!ex)return showWorkout(dayId); const cfg=exerciseConfig(ex), aim=aimParts(day,ex);
+    const draft={name:ex.name,min:cfg.min,max:cfg.max,notes:ex.notes||'',warm:{...warmupFor(dayId,exId)},sets:exerciseSets(dayId,exId).map(s=>({...s}))};
+    page(`<div id="tb"></div><input class="v17-editor-name" id="ename"><div class="v17-form-label">Warm-up</div><div class="v17-inline"><input class="v17-box-input small" id="ww" inputmode="decimal"><span class="v17-x">×</span><input class="v17-box-input small" id="wr" inputmode="numeric"><span class="v17-unit">${data.unit}</span></div><div class="v17-form-label">Working Sets</div><div id="setEditor"></div><button class="v17-add-set" id="addSet">＋ Add Set</button><div class="v17-aim-card"><button class="v17-help" id="aimHelp">?</button><div class="v17-aim-title">Next Session Target (AIM)</div><div class="v17-target-row" id="targetRow"></div><div class="v17-aim-explain">Suggested progressive overload based on your performance and rep range.</div></div><div class="v17-range-row"><span>Rep Range (R-Aim)</span><span class="spacer"></span><input class="v17-box-input tiny" id="rmin" inputmode="numeric"><span>–</span><input class="v17-box-input tiny" id="rmax" inputmode="numeric"><button class="v17-help" style="position:static" id="infoHelp">?</button></div><div class="v17-form-label">Notes (optional)</div><textarea class="v17-textarea" id="notes" placeholder="Technique cues, setup, how it felt..."></textarea><div class="v17-bottom-actions"><button class="v17-cancel" id="cancel">Cancel</button><button class="v17-save" id="save">Save</button></div>`);
+    document.getElementById('tb').replaceWith(topbar('Edit Exercise','‹ Back','🗑',()=>showWorkout(dayId),()=>deleteExercise(dayId,exId)));
+    const en=document.getElementById('ename');en.value=draft.name; en.oninput=()=>draft.name=en.value;
+    const ww=document.getElementById('ww'),wr=document.getElementById('wr');ww.value=draft.warm.weight;wr.value=draft.warm.reps;ww.oninput=()=>draft.warm.weight=ww.value;wr.oninput=()=>draft.warm.reps=wr.value;
+    const rmin=document.getElementById('rmin'),rmax=document.getElementById('rmax');rmin.value=draft.min;rmax.value=draft.max;rmin.oninput=()=>draft.min=Number(rmin.value)||draft.min;rmax.oninput=()=>draft.max=Number(rmax.value)||draft.max;
+    const notes=document.getElementById('notes');notes.value=draft.notes;notes.oninput=()=>draft.notes=notes.value;
+    const target=document.getElementById('targetRow'); if(aim.rec){target.innerHTML=`<div class="v17-target-chip">${esc(aim.weight)}</div><span>×</span>${aim.reps.map(r=>`<div class="v17-target-chip">${r}</div>`).join('')}<span class="v17-unit">${data.unit}</span>`;}else target.innerHTML='<span class="v17-subtle">Finish a workout to generate your first target.</span>';
+    if(aim.rec)document.getElementById('aimHelp').onclick=()=>alert(`${aim.rec.title}\n${aim.rec.main}\n\n${aim.rec.note}`); else document.getElementById('aimHelp').onclick=()=>alert('AIM appears after you finish at least one workout for this exercise.');
+    document.getElementById('infoHelp').onclick=()=>showExerciseInfo(dayId,exId,'info');
+    const setWrap=document.getElementById('setEditor');
+    const redraw=()=>{setWrap.innerHTML='';draft.sets.forEach((s,i)=>{const row=document.createElement('div');row.className='v17-set-editor';row.innerHTML=`<div class="v17-set-num">${i+1}</div><input class="v17-box-input" inputmode="decimal"><span>×</span><input class="v17-box-input" inputmode="numeric"><div class="v17-checks"><label class="v17-check-label"><input type="checkbox" class="v17-check f">F</label><label class="v17-check-label"><input type="checkbox" class="v17-check ds">DS</label></div>`; const ins=row.querySelectorAll('.v17-box-input');ins[0].value=s.weight;ins[1].value=s.reps;ins[0].oninput=()=>s.weight=ins[0].value;ins[1].oninput=()=>s.reps=ins[1].value;const f=row.querySelector('.f'),ds=row.querySelector('.ds');f.checked=!!s.failure;ds.checked=!!s.dropset;f.onchange=()=>s.failure=f.checked;ds.onchange=()=>s.dropset=ds.checked;setWrap.appendChild(row);});}; redraw();

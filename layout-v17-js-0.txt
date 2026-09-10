@@ -1,0 +1,79 @@
+(() => {
+  'use strict';
+
+  const VERSION = '17';
+  const app = document.getElementById('app');
+  document.getElementById('settingsFab')?.remove();
+  document.getElementById('libraryFab')?.remove();
+  document.querySelectorAll('.modal-backdrop').forEach(el => { el.style.display='none'; });
+
+  if (!data.warmups || typeof data.warmups !== 'object') data.warmups = {};
+  if (!Array.isArray(data.progressPhotos)) data.progressPhotos = [];
+  if (!Array.isArray(data.bodyweight)) data.bodyweight = [];
+  if (!data.unit) data.unit = 'kg';
+  data.days.forEach(day => (day.exercises || []).forEach(ex => {
+    if (!Number.isInteger(ex.defaultSets) || ex.defaultSets < 1) ex.defaultSets = 1;
+    if (typeof ex.notes !== 'string') ex.notes = '';
+  }));
+  saveData();
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const todayLong = () => new Date().toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+  const page = inner => { app.innerHTML = `<div class="v17-page">${inner}</div>`; window.scrollTo(0,0); };
+  const topbar = (title,left='‹ Back',right='',leftFn=null,rightFn=null) => {
+    const el = document.createElement('div'); el.className='v17-topbar';
+    el.innerHTML = `<button class="v17-nav-left">${left}</button><div class="v17-title">${esc(title)}</div><button class="v17-nav-right">${right}</button>`;
+    if (leftFn) el.querySelector('.v17-nav-left').onclick=leftFn; else el.querySelector('.v17-nav-left').style.visibility='hidden';
+    if (rightFn) el.querySelector('.v17-nav-right').onclick=rightFn; else el.querySelector('.v17-nav-right').style.visibility=right?'visible':'hidden';
+    return el;
+  };
+
+  function warmupsForDay(dayId){ if(!data.warmups[dayId]) data.warmups[dayId]={}; return data.warmups[dayId]; }
+  function warmupFor(dayId,exId){ const w=warmupsForDay(dayId); if(!w[exId]) w[exId]={weight:'',reps:''}; return w[exId]; }
+  function emptySet(){ return {weight:'',reps:'',failure:false,dropset:false}; }
+  function getDay(dayId){ return data.days.find(d=>d.id===dayId); }
+  function getEx(day,exId){ return day?.exercises?.find(e=>e.id===exId); }
+  function setText(set){ if(!set)return''; const w=Number(set.weight),r=Number(set.reps); if(!Number.isFinite(w)||!Number.isFinite(r)||r<=0)return''; return `${formatWeight(w)}/${r}${set.failure?'F':''}${set.dropset?'DS':''}`; }
+  function warmText(w){ if(!w)return''; const a=Number(w.weight),b=Number(w.reps); return Number.isFinite(a)&&Number.isFinite(b)&&b>0?`${formatWeight(a)}/${b}`:''; }
+  function aimParts(day,ex){
+    const cfg=exerciseConfig(ex), rec=recommendNext(day,ex);
+    if(!rec) return {rec:null,weight:'—',reps:[],compact:'—'};
+    let weight = Number.isFinite(rec.weight) ? formatWeight(rec.weight) : null;
+    let reps = Array.isArray(rec.reps)?rec.reps:[];
+    if(!weight && rec.main){ const m=String(rec.main).match(/([0-9]+(?:\.[0-9]+)?)\s*kg/i); if(m)weight=m[1]; }
+    if(!reps.length && rec.main){ const x=String(rec.main).match(/×\s*([0-9, ]+)/); if(x) reps=x[1].split(/[ ,]+/).filter(Boolean).map(Number); }
+    const compact = `${weight || (cfg.loadType==='assistance'?'assist':'—')}${reps.length?'/'+reps.join(' '):''}`;
+    return {rec,weight:weight||'—',reps,compact};
+  }
+
+  function armSvg(){return `<svg class="v17-arm-svg" viewBox="0 0 80 80" aria-hidden="true"><path d="M14 57c10-3 13-14 16-24 2-8 7-12 13-11 4 1 6 4 7 8 1 3 3 5 7 5 4 0 7-2 9-5 3 8 1 17-4 22-7 7-17 7-26 4-8-3-14 0-22 7"/><path d="M31 34c4 3 8 4 13 3M42 23c-1-5 2-10 7-12M50 12c5 3 8 8 8 14"/></svg>`;}
+  function dumbbellSvg(){return `<svg class="v17-dumbbell-svg" viewBox="0 0 90 60" aria-hidden="true"><path d="M18 26h54M25 19v14M31 17v18M59 17v18M65 19v14M13 22v22M77 22v22M9 27v12M81 27v12"/><path d="M37 30c2-8 14-8 16 0"/></svg>`;}
+
+  function renderHabitMini(container){
+    if(!container)return; container.innerHTML='';
+    lastThirtyDateKeys().forEach(k=>{ const p=habitCompletion(k); const level=habitShadeLevel(p.fraction); const b=document.createElement('button'); b.className=`v17-h${Math.max(0,level)}`; b.title=p.total?`${p.done}/${p.total}`:'No habits'; b.onclick=()=>showHabits(k); container.appendChild(b); });
+  }
+
+  function showWorkouts(){
+    currentDayId=null;
+    page(`<div id="tb"></div><div class="v17-list" id="days"></div><button class="v17-list-row v17-add-row" id="addDay"><span><span class="plus">+</span>Add Workout</span></button><div class="v17-habit-mini" id="habitMini" aria-label="Last 30 days habits"></div>`);
+    document.getElementById('tb').replaceWith(topbar('Workouts','‹','Edit',showMore,showSettings));
+    const list=document.getElementById('days');
+    data.days.forEach(day=>{ const b=document.createElement('button'); b.className='v17-list-row'; b.innerHTML=`<span>${esc(day.name)}</span><span class="chev">›</span>`; b.onclick=()=>showWorkout(day.id); list.appendChild(b); });
+    document.getElementById('addDay').onclick=()=>{ const day={id:cryptoId(),name:'New Workout',exercises:[]}; data.days.push(day); saveData(); showWorkoutManager(day.id); };
+    renderHabitMini(document.getElementById('habitMini'));
+  }
+
+  function makeInlinePair(state,cfg,prev,isWarm=false){
+    const wrap=document.createElement('div'); wrap.className='v17-cell-pair';
+    const w=document.createElement('input'); w.className='v17-cell-input v17-weight'; w.inputMode='decimal'; w.value=state.weight??''; w.placeholder=prev?.weight!==undefined&&prev?.weight!==''?formatWeight(Number(prev.weight)):(cfg.loadType==='assistance'&&!isWarm?'A':'');
+    const slash=document.createElement('span'); slash.className='v17-cell-slash'; slash.textContent='/';
+    const r=document.createElement('input'); r.className='v17-cell-input'; r.inputMode='numeric'; r.value=state.reps??''; r.placeholder=prev?.reps||'';
+    w.oninput=()=>{state.weight=w.value;saveData();}; r.oninput=()=>{state.reps=r.value;saveData();};
+    wrap.append(w,slash,r); return wrap;
+  }
+
+  function showWorkout(dayId){
+    currentDayId=dayId; const day=getDay(dayId); if(!day)return showWorkouts();
+    const quote=nextQuote(); const maxSets=3;
+    page(`<div id="tb"></div><div class="v17-quote-row"><div class="v17-quote">“${esc(quote)}”</div><div class="v17-date">${esc(todayLong())}</div></div><div class="v17-workout-scroll"><table class="v17-workout-table"><thead><tr><th class="v17-ex-col">Exercise</th><th class="v17-warm-col">W</th>${Array.from({length:maxSets},(_,i)=>`<th class="v17-set-col">${i+1}</th>`).join('')}<th class="v17-aim-col">AIM</th><th class="v17-raim-col">R-Aim</th></tr></thead><tbody id="workbody"></tbody></table></div><button class="v17-add-ex" id="addEx"><span style="font-family:Arial;font-size:22px">+</span> Add Exercise</button><div class="v17-workout-footer"><div class="v17-arm-note">${armSvg()}<span>“Progress<br>over perfection.”</span></div><button class="v17-primary" id="finish">Finish Workout</button><div class="v17-small-note">Tap an exercise name for full set controls, failure/drop-set buttons, notes and history.</div></div>`);

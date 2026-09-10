@@ -1,0 +1,62 @@
+        if (!ex || block.querySelector('.sheet-extra-settings')) return;
+        const extra = document.createElement('div');
+        extra.className = 'sheet-extra-settings';
+
+        const setsField = document.createElement('label');
+        setsField.className = 'sheet-setting-field';
+        setsField.innerHTML = '<span>Sets</span>';
+        const setsInput = document.createElement('input');
+        setsInput.inputMode = 'numeric';
+        setsInput.value = ex.defaultSets || exerciseSets(day.id, ex.id).length || 1;
+        setsInput.setAttribute('aria-label', `Default sets for ${ex.name}`);
+        setsInput.addEventListener('change', () => {
+          const value = Math.max(1, Math.min(12, Math.round(Number(setsInput.value) || 1)));
+          ex.defaultSets = value;
+          const current = exerciseSets(day.id, ex.id);
+          while (current.length < value) current.push({weight:'', reps:'', failure:false, dropset:false});
+          while (current.length > value) {
+            const last = current[current.length - 1];
+            const entered = String(last.weight ?? '').trim() || String(last.reps ?? '').trim() || last.failure || last.dropset;
+            if (entered) break;
+            current.pop();
+          }
+          saveData();
+          setsInput.value = ex.defaultSets;
+        });
+        setsField.appendChild(setsInput);
+
+        const rirField = document.createElement('label');
+        rirField.className = 'sheet-setting-field';
+        rirField.innerHTML = '<span>RIR</span>';
+        const rirInput = document.createElement('input');
+        rirInput.placeholder = 'e.g. 1-2';
+        rirInput.value = ex.targetRir || '';
+        rirInput.setAttribute('aria-label', `Target RIR for ${ex.name}`);
+        rirInput.addEventListener('input', () => { ex.targetRir = rirInput.value; saveData(); });
+        rirField.appendChild(rirInput);
+
+        extra.append(setsField, rirField);
+        block.appendChild(extra);
+      });
+    });
+  };
+
+  // Clean warm-up records when a day/exercise has been deleted through the legacy settings UI.
+  const legacySaveData = saveData;
+  saveData = function() {
+    if (data.warmups && typeof data.warmups === 'object') {
+      const validDays = new Set(data.days.map(d => d.id));
+      Object.keys(data.warmups).forEach(dayId => {
+        if (!validDays.has(dayId)) { delete data.warmups[dayId]; return; }
+        const day = data.days.find(d => d.id === dayId);
+        const validExercises = new Set((day?.exercises || []).map(ex => ex.id));
+        Object.keys(data.warmups[dayId] || {}).forEach(exId => { if (!validExercises.has(exId)) delete data.warmups[dayId][exId]; });
+      });
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  };
+
+  // Re-render current screen with the upgraded layout after the legacy app has booted.
+  if (currentDayId) renderWorkout(currentDayId);
+  else renderHome();
+})();

@@ -1,0 +1,140 @@
+(() => {
+  'use strict';
+
+  // This overlay deliberately keeps the original V14 storage key/data model.
+  // It only adds optional warm-up and target-RIR fields, so existing local data survives.
+  if (!data.warmups || typeof data.warmups !== 'object') data.warmups = {};
+  data.days.forEach(day => (day.exercises || []).forEach(ex => {
+    if (typeof ex.targetRir !== 'string') ex.targetRir = '';
+    if (!Number.isInteger(ex.defaultSets) || ex.defaultSets < 1) ex.defaultSets = 1;
+  }));
+  saveData();
+
+  function dayWarmups(dayId) {
+    if (!data.warmups[dayId]) data.warmups[dayId] = {};
+    return data.warmups[dayId];
+  }
+
+  function exerciseWarmup(dayId, exerciseId) {
+    const warmups = dayWarmups(dayId);
+    if (!warmups[exerciseId]) warmups[exerciseId] = { weight: '', reps: '' };
+    return warmups[exerciseId];
+  }
+
+  function setLastText(set) {
+    if (!set) return '';
+    const w = Number(set.weight);
+    const r = Number(set.reps);
+    if (!Number.isFinite(w) || !Number.isFinite(r) || r <= 0) return '';
+    return `${formatWeight(w)}/${r}${set.failure ? 'F' : ''}${set.dropset ? 'DS' : ''}`;
+  }
+
+  function warmupLastText(warmup) {
+    if (!warmup) return '';
+    const w = Number(warmup.weight);
+    const r = Number(warmup.reps);
+    if (!Number.isFinite(w) || !Number.isFinite(r) || r <= 0) return '';
+    return `${formatWeight(w)}/${r}W`;
+  }
+
+  function compactAim(rec, cfg) {
+    if (!rec) return { label: '—', kind: '' };
+    let label = '';
+    if (Number.isFinite(rec.weight)) {
+      label = `${formatWeight(rec.weight)}${cfg.loadType === 'assistance' ? 'A' : ''}/${(rec.reps || []).join(',')}`;
+    } else if (Array.isArray(rec.reps) && rec.reps.length) {
+      label = rec.reps.join(',');
+    } else {
+      label = String(rec.main || '—')
+        .replace(/\s*kg\s*assist\s*×\s*/gi, 'A/')
+        .replace(/\s*kg\s*×\s*/gi, '/')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+    const kind = rec.kind === 'increase' ? 'Up' : rec.kind === 'reduce' ? 'Down' : 'Hold';
+    return { label, kind };
+  }
+
+  function makePairInputs(state, cfg, index, isWarmup = false) {
+    const wrap = document.createElement('div');
+    const pair = document.createElement('div');
+    pair.className = 'sheet-pair';
+
+    const weight = document.createElement('input');
+    weight.className = 'sheet-mini-input';
+    weight.inputMode = 'decimal';
+    weight.placeholder = cfg.loadType === 'assistance' && !isWarmup ? 'A' : 'kg';
+    weight.value = state.weight ?? '';
+    weight.setAttribute('aria-label', `${isWarmup ? 'Warm-up weight' : (cfg.loadType === 'assistance' ? 'Assistance' : 'Weight')} ${index ? `for set ${index}` : ''}`.trim());
+
+    const slash = document.createElement('span');
+    slash.className = 'sheet-slash';
+    slash.textContent = '/';
+
+    const reps = document.createElement('input');
+    reps.className = 'sheet-mini-input';
+    reps.inputMode = 'numeric';
+    reps.placeholder = 'rep';
+    reps.value = state.reps ?? '';
+    reps.setAttribute('aria-label', `${isWarmup ? 'Warm-up reps' : 'Reps'} ${index ? `for set ${index}` : ''}`.trim());
+
+    weight.addEventListener('input', () => { state.weight = weight.value; saveData(); });
+    reps.addEventListener('input', () => { state.reps = reps.value; saveData(); });
+    pair.append(weight, slash, reps);
+    wrap.appendChild(pair);
+    return wrap;
+  }
+
+  function buildWarmCell(day, ex, cfg, prev) {
+    const td = document.createElement('td');
+    td.className = 'sheet-warm-cell';
+    const warm = exerciseWarmup(day.id, ex.id);
+    td.appendChild(makePairInputs(warm, cfg, 0, true));
+    const mark = document.createElement('div');
+    mark.className = 'sheet-warm-mark';
+    mark.textContent = 'WARM';
+    td.appendChild(mark);
+    const last = warmupLastText(prev?.warmup);
+    const lastLine = document.createElement('div');
+    lastLine.className = 'sheet-last';
+    lastLine.innerHTML = last ? `L <strong>${last}</strong>` : '&nbsp;';
+    td.appendChild(lastLine);
+    return td;
+  }
+
+  function buildSetCell(day, ex, cfg, set, setIndex, prevSet) {
+    const td = document.createElement('td');
+    td.className = 'sheet-set-cell';
+    td.appendChild(makePairInputs(set, cfg, setIndex + 1, false));
+
+    const flags = document.createElement('div');
+    flags.className = 'sheet-flags';
+    const failure = document.createElement('button');
+    failure.className = `sheet-flag-btn ${set.failure ? 'active' : ''}`;
+    failure.textContent = 'F';
+    failure.title = 'Failure';
+    failure.setAttribute('aria-label', `Toggle failure for set ${setIndex + 1}`);
+    const dropset = document.createElement('button');
+    dropset.className = `sheet-flag-btn ds ${set.dropset ? 'active' : ''}`;
+    dropset.textContent = 'DS';
+    dropset.title = 'Drop set';
+    dropset.setAttribute('aria-label', `Toggle drop set for set ${setIndex + 1}`);
+    failure.addEventListener('click', () => {
+      set.failure = !set.failure;
+      failure.classList.toggle('active', set.failure);
+      saveData();
+    });
+    dropset.addEventListener('click', () => {
+      set.dropset = !set.dropset;
+      dropset.classList.toggle('active', set.dropset);
+      saveData();
+    });
+    flags.append(failure, dropset);
+    td.appendChild(flags);
+
+    const lastText = setLastText(prevSet);
+    const last = document.createElement('div');
+    last.className = 'sheet-last';
+    last.innerHTML = lastText ? `L <strong>${lastText}</strong>` : '&nbsp;';
+    td.appendChild(last);
+    return td;

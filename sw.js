@@ -1,5 +1,5 @@
-const CACHE = 'gym-tracker-v15';
-const ASSETS = ['./','./index.html','./legacy.html','./layout-v15.css','./layout-v15-0.txt','./layout-v15-1.txt','./layout-v15-2.txt','./layout-v15-3.txt','./layout-v15-4.txt','./apple-touch-icon.png'];
+const CACHE = 'gym-tracker-v16';
+const ASSETS = ['./','./index.html','./legacy.html','./layout-v16.css','./layout-v16.js','./apple-touch-icon.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
 });

@@ -17,10 +17,10 @@
     const files = ['./legacy.html?v=15','./layout-v15-0.txt?v=15','./layout-v15-1.txt?v=15','./layout-v15-2.txt?v=15','./layout-v15-3.txt?v=15','./layout-v15-4.txt?v=15'];
     Promise.all(files.map(url => fetch(url).then(r => { if (!r.ok) throw new Error('Could not load ' + url); return r.text(); })))
       .then(([html, ...parts]) => {
-        const script = parts.join('\n').replace(/<\/script/gi, '<\\/script');
+        const script = parts.join('\n');
         const enhanced = html
           .replace('</head>', '<link rel="stylesheet" href="layout-v15.css?v=15"></head>')
-          .replace('</body>', '<script>' + script + '<\\/script></body>');
+          .replace('</body>', '<script>' + script + '</' + 'script></body>');
         document.open();
         document.write(enhanced);
         document.close();

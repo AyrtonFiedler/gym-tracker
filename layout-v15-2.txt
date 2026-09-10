@@ -1,0 +1,70 @@
+    rirInput.setAttribute('aria-label', `Target RIR for ${ex.name}`);
+    rirInput.addEventListener('input', () => { ex.targetRir = rirInput.value; saveData(); });
+    rir.appendChild(rirInput);
+    row.appendChild(rir);
+
+    const repAim = document.createElement('td');
+    repAim.className = 'sheet-rep-aim-cell';
+    repAim.textContent = `${cfg.min}-${cfg.max}`;
+    row.appendChild(repAim);
+
+    const control = document.createElement('td');
+    control.className = 'sheet-control-cell';
+    const controls = document.createElement('div');
+    controls.className = 'sheet-set-controls';
+    const add = document.createElement('button');
+    add.className = 'sheet-set-control'; add.textContent = '+'; add.title = 'Add set';
+    const remove = document.createElement('button');
+    remove.className = 'sheet-set-control'; remove.textContent = '−'; remove.title = 'Remove last set';
+    remove.disabled = sets.length <= 1;
+    add.addEventListener('click', () => {
+      sets.push({weight:'', reps:'', failure:false, dropset:false});
+      ex.defaultSets = Math.max(ex.defaultSets || 1, sets.length);
+      saveData();
+      renderWorkout(day.id);
+    });
+    remove.addEventListener('click', () => {
+      if (sets.length <= 1) return;
+      const last = sets[sets.length - 1];
+      const entered = String(last.weight ?? '').trim() || String(last.reps ?? '').trim() || last.failure || last.dropset;
+      if (entered && !confirm('Remove the last set and its entered data?')) return;
+      sets.pop();
+      ex.defaultSets = Math.min(ex.defaultSets || sets.length, sets.length);
+      saveData();
+      renderWorkout(day.id);
+    });
+    controls.append(add, remove);
+    control.appendChild(controls);
+    row.appendChild(control);
+    return row;
+  }
+
+  renderWorkout = function(dayId) {
+    currentDayId = dayId;
+    const day = data.days.find(d => d.id === dayId);
+    if (!day) return renderHome();
+    if (!data.warmups || typeof data.warmups !== 'object') data.warmups = {};
+    (day.exercises || []).forEach(ex => { if (typeof ex.targetRir !== 'string') ex.targetRir = ''; });
+
+    const app = document.getElementById('app');
+    if (!day.exercises.length) {
+      app.innerHTML = `<div class="header"><button class="back-btn" id="backBtn" aria-label="Back">‹</button><div><h1 id="workoutTitle"></h1><p class="subtitle">Workout sheet</p></div></div><div class="empty">No exercises in this workout.<br>Add some in ⚙ settings.</div>`;
+      document.getElementById('workoutTitle').textContent = day.name;
+      document.getElementById('backBtn').addEventListener('click', renderHome);
+      return;
+    }
+
+    const maxSets = Math.max(1, ...day.exercises.map(ex => exerciseSets(day.id, ex.id).length));
+    app.innerHTML = `
+      <div class="header"><button class="back-btn" id="backBtn" aria-label="Back">‹</button><div><h1 id="workoutTitle"></h1><p class="subtitle">Weight / reps · W = warm-up · F = failure · DS = drop set</p></div></div>
+      <div class="workout-sheet-hint">Swipe sideways for Aim, RIR and rep range. Last workout is shown as the tiny “L” value under each set.</div>
+      <div class="workout-sheet-wrap" id="workoutSheetWrap">
+        <table class="workout-sheet" id="workoutSheet">
+          <thead>
+            <tr class="sheet-group-row">
+              <th class="sheet-exercise-col" rowspan="2">Exercise</th>
+              <th class="sheet-sets-group" colspan="${maxSets + 1}">Sets W/Rep</th>
+              <th class="sheet-aim-col" rowspan="2">AIM</th>
+              <th class="sheet-rir-col" rowspan="2">RIR</th>
+              <th class="sheet-rep-aim-col" rowspan="2">R-Aim</th>
+              <th class="sheet-control-col" rowspan="2">Sets</th>

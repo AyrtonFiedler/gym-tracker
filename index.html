@@ -5,26 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#f7f1e5">
+  <meta name="theme-color" content="#fbf8ee">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>Gym Tracker</title>
-  <style>html,body{margin:0;min-height:100%;background:#f7f1e5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}#boot{min-height:100vh;display:grid;place-items:center;color:#777;font-size:13px}</style>
+  <style>html,body{margin:0;min-height:100%;background:#171717;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}#boot{min-height:100vh;display:grid;place-items:center;color:#777;font-size:13px}</style>
 </head>
 <body>
   <div id="boot">Loading gym tracker…</div>
   <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
-    fetch('./legacy.html?v=16')
-      .then(r => { if (!r.ok) throw new Error('Could not load app'); return r.text(); })
-      .then(html => {
+
+    const files = [
+      './legacy.html?v=17',
+      './layout-v17-css-0.txt?v=17',
+      './layout-v17-css-1.txt?v=17',
+      './layout-v17-css-2.txt?v=17',
+      './layout-v17-js-0.txt?v=17',
+      './layout-v17-js-1.txt?v=17',
+      './layout-v17-js-2.txt?v=17',
+      './layout-v17-js-3.txt?v=17',
+      './layout-v17-js-4.txt?v=17',
+      './layout-v17-js-5.txt?v=17'
+    ];
+
+    Promise.all(files.map(url => fetch(url).then(r => {
+      if (!r.ok) throw new Error('Could not load ' + url);
+      return r.text();
+    })))
+      .then(([html, css0, css1, css2, ...jsParts]) => {
+        const css = [css0, css1, css2].join('\n');
+        const script = jsParts.join('\n');
         const enhanced = html
-          .replace('</head>', '<link rel="stylesheet" href="layout-v16.css?v=16"></head>')
-          .replace('</body>', '<script src="layout-v16.js?v=16"></' + 'script></body>');
+          .replace('</head>', '<style>' + css + '</style></head>')
+          .replace('</body>', '<script>' + script + '</' + 'script></body>');
         document.open();
         document.write(enhanced);
         document.close();
       })
-      .catch(err => { document.getElementById('boot').textContent = 'Could not load the gym tracker. Check your connection once, then reopen the app.'; console.error(err); });
+      .catch(err => {
+        document.getElementById('boot').textContent = 'Could not load the gym tracker. Check your connection once, then reopen the app.';
+        console.error(err);
+      });
   </script>
 </body>
 </html>

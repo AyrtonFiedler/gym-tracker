@@ -1,0 +1,33 @@
+.v17-list-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;width:100%;min-height:43px;border:0;border-bottom:1px solid rgba(40,40,35,.13);background:transparent;padding:7px 6px 6px 8px;text-align:left;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:15px;cursor:pointer;}
+.v17-list-row .chev{color:#a19b90;font-family:Arial,sans-serif;font-size:20px;font-weight:300;}
+.v17-list-row.active{background:rgba(197,194,183,.44);border-radius:5px;}
+.v17-add-row{font-size:15px}.v17-add-row .plus{font-family:Arial,sans-serif;font-size:22px;margin-right:7px;vertical-align:-1px;}
+.v17-section-title{font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:20px;margin:18px 6px 6px;}
+.v17-habit-mini{display:grid;grid-template-columns:repeat(15,1fr);gap:3px;margin:22px 8px 0;padding-top:12px;border-top:1px solid rgba(40,40,35,.13);}
+.v17-habit-mini button{aspect-ratio:1;border:1px solid rgba(46,74,52,.12);border-radius:2px;padding:0;cursor:pointer}.v17-h0{background:rgba(46,74,52,.04)}.v17-h1{background:rgba(46,74,52,.22)}.v17-h2{background:rgba(46,74,52,.42)}.v17-h3{background:rgba(46,74,52,.64)}.v17-h4{background:rgba(46,74,52,.88)}
+
+/* editor */
+.v17-editor-name{font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:27px;border:0;border-bottom:2px solid #171714;background:transparent;width:min(190px,70%);outline:0;padding:0 3px 2px;margin:8px 5px 12px;}
+.v17-form-label{font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:16px;margin:9px 5px 4px;}
+.v17-inline{display:flex;align-items:center;gap:8px;margin:4px 5px 14px;}
+.v17-box-input{height:36px;border:1px solid #aeb5b3;border-radius:5px;background:rgba(255,255,255,.26);padding:2px 7px;text-align:center;outline:0;font-size:16px;min-width:0;}
+.v17-box-input.small{width:62px}.v17-box-input.tiny{width:54px}.v17-x{font-size:17px}.v17-unit{font-size:13px;}
+.v17-set-editor{display:grid;grid-template-columns:30px 58px 12px 58px 1fr;gap:5px;align-items:center;margin:4px 5px;min-height:39px;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;}
+.v17-set-num{text-align:center;font-size:15px}.v17-checks{display:flex;gap:12px;justify-content:flex-end;align-items:center;font-size:14px;}
+.v17-check-label{display:flex;align-items:center;gap:4px;cursor:pointer}.v17-check{appearance:none;-webkit-appearance:none;width:19px;height:19px;border:1.5px solid #383a37;border-radius:3px;background:rgba(255,255,255,.18);display:grid;place-items:center;margin:0}.v17-check:checked{background:#262623}.v17-check:checked::after{content:"✓";color:#fff;font-family:Arial,sans-serif;font-size:13px;font-weight:700;}
+.v17-add-set{border:0;border-radius:6px;background:#ece8de;padding:7px 11px;margin:7px 5px 13px;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:16px;cursor:pointer;}
+.v17-aim-card{background:var(--v17-peach);border-radius:9px;padding:8px 9px 7px;margin:9px 0 12px;position:relative;}
+.v17-aim-title{font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:17px;margin-bottom:6px;}
+.v17-help{position:absolute;right:8px;top:8px;width:23px;height:23px;border:1.5px solid #222;border-radius:50%;background:transparent;font-weight:700;font-size:13px;cursor:pointer;}
+.v17-target-row{display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:wrap;}
+.v17-target-chip{height:34px;min-width:50px;border:1px solid #aeb5b3;border-radius:5px;background:rgba(255,255,255,.38);display:grid;place-items:center;padding:0 9px;font-size:15px;}
+.v17-aim-explain{text-align:center;font-size:10px;margin-top:5px;line-height:1.2;}
+.v17-range-row{display:flex;align-items:center;gap:8px;margin:8px 4px 13px;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:16px;}
+.v17-range-row .spacer{flex:1}.v17-textarea{width:100%;min-height:92px;border:1px solid #aeb5b3;border-radius:6px;background:rgba(255,255,255,.22);resize:vertical;padding:8px;font-size:15px;outline:0;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;}
+.v17-bottom-actions{display:grid;grid-template-columns:1fr 1fr;gap:15px;align-items:center;margin:14px 4px 0;padding-bottom:10px;}.v17-cancel{border:0;background:transparent;text-align:left;padding:10px 0;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:16px;cursor:pointer}.v17-save{border:0;border-radius:7px;background:#171717;color:#fff!important;padding:11px 18px;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:16px;cursor:pointer;}
+
+/* info/history */
+.v17-info-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:8px 5px 4px}.v17-info-name{font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:28px;border-bottom:2px solid #171714;padding-bottom:1px}.v17-dumbbell-svg{width:72px;height:52px;fill:none;stroke:#171714;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+.v17-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:7px 0 7px;border-bottom:1px solid rgba(40,40,35,.12);}.v17-tab{border:0;background:transparent;padding:8px 3px;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:14px;cursor:pointer;border-radius:7px 7px 0 0}.v17-tab.active{background:rgba(224,221,211,.65);border-bottom:2px solid #222;}
+.v17-history-table{width:100%;border-collapse:collapse;font-size:11px;background:rgba(251,248,238,.5)}.v17-history-table th,.v17-history-table td{border:1px solid #b9c0bf;padding:5px 3px;text-align:center}.v17-history-table th{font-weight:500;background:rgba(251,248,238,.65)}
+.v17-chart-title{font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:20px;margin:14px 5px 3px}.v17-chart{width:100%;height:145px;display:block}.v17-chart-grid{stroke:#cfd1cb;stroke-width:1}.v17-chart-line{fill:none;stroke:#171714;stroke-width:2}.v17-chart-dot{fill:#171714}.v17-chart-label{fill:#59584f;font-size:9px;font-family:Arial,sans-serif}

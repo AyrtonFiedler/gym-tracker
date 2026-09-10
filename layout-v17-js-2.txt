@@ -1,0 +1,39 @@
+    document.getElementById('addSet').onclick=()=>{draft.sets.push(emptySet());redraw();};
+    document.getElementById('cancel').onclick=()=>showWorkout(dayId);
+    document.getElementById('save').onclick=()=>{
+      ex.name=draft.name.trim()||'Untitled Exercise'; const matched=matchLibrary(ex.name); ex.libraryId=matched?matched.id:null; ex.customMin=Math.max(1,Number(draft.min)||cfg.min); ex.customMax=Math.max(ex.customMin,Number(draft.max)||cfg.max); ex.notes=draft.notes; ex.defaultSets=Math.max(1,draft.sets.length); dayLog(dayId)[exId]=draft.sets; warmupsForDay(dayId)[exId]=draft.warm; saveData(); showWorkout(dayId);
+    };
+  }
+
+  function deleteExercise(dayId,exId){
+    const day=getDay(dayId),ex=getEx(day,exId); if(!day||!ex)return; if(!confirm(`Delete ${ex.name}?`))return; day.exercises=day.exercises.filter(e=>e.id!==exId); if(data.logs[dayId])delete data.logs[dayId][exId]; if(data.history[dayId])delete data.history[dayId][exId]; if(data.warmups[dayId])delete data.warmups[dayId][exId]; saveData(); showWorkout(dayId);
+  }
+
+  function sessionVolume(session){return (session?.sets||[]).reduce((sum,s)=>{const w=Number(s.weight),r=Number(s.reps);return sum+(Number.isFinite(w)&&Number.isFinite(r)?w*r:0);},0);}
+  function bestSet(session){
+    const sets=completedSets(session?.sets||[]).filter(s=>!s.dropset); if(!sets.length)return null; return sets.slice().sort((a,b)=>{const ea=estimatedOneRepMax(a.weight,a.reps)||0,eb=estimatedOneRepMax(b.weight,b.reps)||0;return eb-ea;})[0];
+  }
+  function allSets(dayId,exId){ return historyFor(dayId,exId).flatMap(s=>(s.sets||[]).map(x=>({...x,date:s.date}))); }
+  function prs(dayId,exId){
+    const hist=historyFor(dayId,exId),sets=allSets(dayId,exId).filter(s=>Number(s.reps)>0&&Number(s.weight)>=0); if(!sets.length)return null;
+    const topWeight=sets.slice().sort((a,b)=>Number(b.weight)-Number(a.weight)||Number(b.reps)-Number(a.reps))[0]; const mostReps=sets.slice().sort((a,b)=>Number(b.reps)-Number(a.reps)||Number(b.weight)-Number(a.weight))[0]; const e=sets.map(s=>({s,v:estimatedOneRepMax(Number(s.weight),Number(s.reps))||0})).sort((a,b)=>b.v-a.v)[0]; return {topWeight,mostReps,e1rm:e,totalVolume:hist.reduce((a,s)=>a+sessionVolume(s),0),sessions:hist.length};
+  }
+  function simpleLineChart(points){
+    const W=330,H=145,L=30,R=8,T=8,B=24;if(!points.length)return'<div class="v17-subtle" style="padding:25px;text-align:center">No chart data yet.</div>'; const vals=points.map(p=>p.v);let min=Math.min(...vals),max=Math.max(...vals);if(max-min<1){min=Math.max(0,min-1);max+=1}else{const pad=(max-min)*.12;min=Math.max(0,min-pad);max+=pad;} const x=i=>points.length===1?L+(W-L-R)/2:L+i*(W-L-R)/(points.length-1);const y=v=>T+(max-v)*(H-T-B)/(max-min);let s=`<svg class="v17-chart" viewBox="0 0 ${W} ${H}">`;for(let i=0;i<4;i++){const yy=T+i*(H-T-B)/3;s+=`<line class="v17-chart-grid" x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}"/>`;}s+=`<polyline class="v17-chart-line" points="${points.map((p,i)=>`${x(i)},${y(p.v)}`).join(' ')}"/>`;points.forEach((p,i)=>s+=`<circle class="v17-chart-dot" cx="${x(i)}" cy="${y(p.v)}" r="3"/>`);const labels=[0,Math.floor((points.length-1)/2),points.length-1];[...new Set(labels)].forEach(i=>{s+=`<text class="v17-chart-label" x="${x(i)}" y="${H-6}" text-anchor="middle">${esc(formatDateShort(points[i].date))}</text>`});s+='</svg>';return s;
+  }
+
+  function showExerciseInfo(dayId,exId,tab='history'){
+    const day=getDay(dayId),ex=getEx(day,exId);if(!ex)return showWorkout(dayId);const lib=getLibraryForExercise(ex),cfg=exerciseConfig(ex),hist=historyFor(dayId,exId),p=prs(dayId,exId);
+    page(`<div id="tb"></div><div class="v17-info-head"><div class="v17-info-name">${esc(ex.name)}</div>${dumbbellSvg()}</div><div class="v17-tabs"><button data-tab="info" class="v17-tab">Info</button><button data-tab="history" class="v17-tab">History</button><button data-tab="chart" class="v17-tab">Chart</button><button data-tab="logs" class="v17-tab">Logs</button></div><div id="infoContent"></div>`);
+    document.getElementById('tb').replaceWith(topbar('Exercise Info','‹ Back','',()=>showExerciseEditor(dayId,exId)));
+    document.querySelectorAll('.v17-tab').forEach(b=>{b.classList.toggle('active',b.dataset.tab===tab);b.onclick=()=>showExerciseInfo(dayId,exId,b.dataset.tab);});
+    const c=document.getElementById('infoContent');
+    if(tab==='info'){
+      c.innerHTML=`<div class="v17-info-card"><strong>Practical hypertrophy range</strong><div>${cfg.min}–${cfg.max} reps per working set</div></div><div class="v17-info-card"><strong>Primary muscles</strong><div>${lib?esc(simpleMuscles(lib,'primary').join(', ')):'Custom exercise'}</div></div><div class="v17-info-card"><strong>Secondary muscles</strong><div>${lib?esc(simpleMuscles(lib,'secondary').join(', ')||'—'):'—'}</div></div><div class="v17-info-card"><strong>Training note</strong><div>${lib?esc(lib.note):'No library note for this custom exercise.'}</div></div>`; return;
+    }
+    const rows=hist.slice(-5).reverse().map(s=>{const b=bestSet(s);return `<tr><td>${esc(formatDateShort(s.date))}</td><td>${(s.sets||[]).map(setText).join(' ')}</td><td>${b?esc(`${formatWeight(b.weight)}×${b.reps}`):'—'}</td><td>${Math.round(sessionVolume(s)).toLocaleString()}</td></tr>`}).join('');
+    const points=hist.map(s=>{const b=bestSet(s);return b?{date:s.date,v:Number(b.weight)}:null}).filter(Boolean);
+    if(tab==='history'){
+      c.innerHTML=`<table class="v17-history-table"><thead><tr><th>Date</th><th>Sets (kg × reps)</th><th>Top Set</th><th>Volume</th></tr></thead><tbody>${rows||'<tr><td colspan="4">No finished sessions yet.</td></tr>'}</tbody></table><div class="v17-chart-title">Top Set (${esc(data.unit)})</div>${simpleLineChart(points)}<div class="v17-chart-title">Personal Records</div>${p?`<div class="v17-pr-list"><div class="v17-pr"><span>Top Weight</span><span>${formatWeight(Number(p.topWeight.weight))} ${data.unit} (${p.topWeight.reps} reps)</span><span>${esc(formatDateShort(p.topWeight.date))}</span></div><div class="v17-pr"><span>Most Reps</span><span>${formatWeight(Number(p.mostReps.weight))} ${data.unit} (${p.mostReps.reps} reps)</span><span>${esc(formatDateShort(p.mostReps.date))}</span></div><div class="v17-pr"><span>Estimated 1RM</span><span>~ ${Number(p.e1rm.v.toFixed(1))} ${data.unit}</span><span></span></div><div class="v17-pr"><span>Total Volume</span><span>${Math.round(p.totalVolume).toLocaleString()} kg</span><span></span></div><div class="v17-pr"><span>Sessions</span><span>${p.sessions}</span><span></span></div></div>`:'<div class="v17-subtle">No records yet.</div>'}`;
+    }else if(tab==='chart'){ c.innerHTML=`<div class="v17-chart-title">Top Set (${esc(data.unit)})</div>${simpleLineChart(points)}<div class="v17-small-note">Each point uses the heaviest/best straight working set from a finished session.</div>`; }
+    else { c.innerHTML=`<table class="v17-history-table"><thead><tr><th>Date</th><th>Sets</th><th>Volume</th></tr></thead><tbody>${hist.slice().reverse().map(s=>`<tr><td>${esc(new Date(s.date).toLocaleDateString())}</td><td>${(s.sets||[]).map(setText).join(' · ')}</td><td>${Math.round(sessionVolume(s)).toLocaleString()}</td></tr>`).join('')||'<tr><td colspan="3">No logs yet.</td></tr>'}</tbody></table>`; }

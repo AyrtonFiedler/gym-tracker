@@ -1,0 +1,70 @@
+            </tr>
+            <tr class="sheet-sub-row">
+              <th class="sheet-warm-col">Warm</th>
+              ${Array.from({length:maxSets}, (_,i) => `<th class="sheet-set-col">${i+1}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody id="workoutSheetBody"></tbody>
+        </table>
+      </div>
+      <div class="sheet-workout-footer">
+        <button class="finish-btn" id="finishWorkout">Finish workout</button>
+        <div class="sheet-workout-note">Warm-up sets are saved for comparison but excluded from progression, strength charts and weekly muscle-set totals. AIM is the coach algorithm; tap it for the full reasoning. RIR is your editable target for the exercise.</div>
+      </div>`;
+
+    document.getElementById('workoutTitle').textContent = day.name;
+    document.getElementById('backBtn').addEventListener('click', renderHome);
+    const body = document.getElementById('workoutSheetBody');
+    day.exercises.forEach(ex => body.appendChild(buildWorkoutRow(day, ex, maxSets)));
+    document.getElementById('finishWorkout').addEventListener('click', () => finishWorkout(day.id));
+  };
+
+  finishWorkout = function(dayId) {
+    const day = data.days.find(d => d.id === dayId);
+    if (!day) return;
+    const log = dayLog(dayId);
+    const hasAnything = day.exercises.some(ex => completedSets(log[ex.id] || []).length > 0);
+    if (!hasAnything) { alert('Enter at least one completed working set before finishing the workout.'); return; }
+    if (!data.history[dayId]) data.history[dayId] = {};
+    const timestamp = new Date().toISOString();
+
+    day.exercises.forEach(ex => {
+      const sets = log[ex.id] || [];
+      const completed = completedSets(sets);
+      const warm = exerciseWarmup(dayId, ex.id);
+      if (completed.length) {
+        if (!data.history[dayId][ex.id]) data.history[dayId][ex.id] = [];
+        const warmWeight = Number(warm.weight);
+        const warmReps = Number(warm.reps);
+        const warmup = Number.isFinite(warmWeight) && warmWeight >= 0 && Number.isFinite(warmReps) && warmReps > 0
+          ? {weight:warmWeight, reps:warmReps}
+          : null;
+        data.history[dayId][ex.id].push({
+          date: timestamp,
+          warmup,
+          sets: completed.map(s => ({ weight:s.weight, reps:s.reps, failure:s.failure, dropset:s.dropset }))
+        });
+        if (data.history[dayId][ex.id].length > 30) data.history[dayId][ex.id].shift();
+      }
+      const resetCount = Math.max(1, Number.isInteger(ex.defaultSets) ? ex.defaultSets : (completed.length || sets.length || 1));
+      log[ex.id] = Array.from({length:resetCount}, () => ({weight:'', reps:'', failure:false, dropset:false}));
+      dayWarmups(dayId)[ex.id] = {weight:'', reps:''};
+    });
+
+    saveData();
+    renderWorkout(dayId);
+    window.scrollTo({top:0, behavior:'smooth'});
+  };
+
+  const legacyRenderSettings = renderSettings;
+  renderSettings = function() {
+    legacyRenderSettings();
+    const cards = Array.from(document.querySelectorAll('#settingsContent .settings-card'));
+    cards.forEach((card, dayIndex) => {
+      const day = data.days[dayIndex];
+      if (!day) return;
+      const wrap = card.querySelector('.exercise-settings');
+      if (!wrap) return;
+      const exerciseBlocks = Array.from(wrap.children).filter(el => !el.classList.contains('picker-actions'));
+      exerciseBlocks.forEach((block, exIndex) => {
+        const ex = day.exercises[exIndex];

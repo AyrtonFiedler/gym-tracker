@@ -1,0 +1,338 @@
+/* V15 — compact spreadsheet workout layout */
+:root {
+  --sheet-head: #dfa178;
+  --sheet-sub: #ebc2a6;
+  --sheet-grid: #c8b7a7;
+  --sheet-cell: rgba(251,247,237,.93);
+  --sheet-last: #8b8277;
+}
+
+.workout-sheet-hint {
+  margin: -8px 1px 9px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .15px;
+}
+
+.workout-sheet-wrap {
+  width: calc(100% + 24px);
+  margin-left: -12px;
+  margin-right: -12px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid #aa9887;
+  background: rgba(251,247,237,.72);
+  scrollbar-width: thin;
+}
+
+.workout-sheet {
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  min-width: max-content;
+  width: max-content;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.workout-sheet th,
+.workout-sheet td {
+  border-right: 1px solid var(--sheet-grid);
+  border-bottom: 1px solid var(--sheet-grid);
+  padding: 5px 4px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.workout-sheet tr:last-child td { border-bottom: 0; }
+.workout-sheet th:last-child,
+.workout-sheet td:last-child { border-right: 0; }
+
+.workout-sheet thead th {
+  color: #111;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-weight: 800;
+  letter-spacing: .05px;
+}
+
+.workout-sheet .sheet-group-row th { background: var(--sheet-head); font-size: 13px; }
+.workout-sheet .sheet-sub-row th { background: var(--sheet-sub); font-size: 12px; }
+.workout-sheet .sheet-sets-group { font-size: 15px !important; }
+
+.workout-sheet .sheet-exercise-col,
+.workout-sheet .sheet-exercise-cell {
+  width: 154px;
+  min-width: 154px;
+  max-width: 154px;
+  position: sticky;
+  left: 0;
+}
+
+.workout-sheet .sheet-exercise-col {
+  z-index: 7;
+  background: var(--sheet-head) !important;
+  font-size: 15px !important;
+}
+
+.workout-sheet .sheet-exercise-cell {
+  z-index: 4;
+  background: #fbf7ed;
+  text-align: left;
+  padding: 6px 7px;
+  box-shadow: 1px 0 0 var(--sheet-grid);
+}
+
+.sheet-ex-name {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  line-height: 1.1;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.sheet-ex-meta {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 8.5px;
+  line-height: 1.2;
+}
+
+.sheet-ex-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.sheet-tiny-btn {
+  min-width: 24px;
+  height: 21px;
+  border: 1px solid #b9aa9b;
+  border-radius: 3px;
+  background: transparent;
+  color: #4d4842;
+  padding: 0 5px;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sheet-set-col,
+.sheet-set-cell,
+.sheet-warm-col,
+.sheet-warm-cell {
+  width: 91px;
+  min-width: 91px;
+  max-width: 91px;
+}
+
+.sheet-set-cell,
+.sheet-warm-cell,
+.sheet-aim-cell,
+.sheet-rir-cell,
+.sheet-rep-aim-cell,
+.sheet-control-cell {
+  background: var(--sheet-cell);
+}
+
+.sheet-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 7px minmax(0, 1fr);
+  align-items: center;
+  gap: 1px;
+  min-height: 28px;
+}
+
+.sheet-mini-input {
+  width: 100%;
+  min-width: 0;
+  height: 27px;
+  border: 0;
+  border-bottom: 1px solid #a3978a;
+  border-radius: 0;
+  background: transparent;
+  padding: 1px;
+  text-align: center;
+  color: var(--text);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 14px;
+  outline: none;
+}
+
+.sheet-mini-input:focus {
+  background: rgba(255,255,255,.55);
+  border-bottom-color: #222;
+}
+
+.sheet-slash { color: #625b53; font-size: 12px; font-weight: 700; }
+
+.sheet-flags {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+  margin-top: 3px;
+  min-height: 18px;
+}
+
+.sheet-flag-btn {
+  height: 18px;
+  min-width: 24px;
+  border: 1px solid #bbb0a4;
+  border-radius: 3px;
+  background: transparent;
+  color: #7a7168;
+  padding: 0 4px;
+  font-size: 8px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.sheet-flag-btn.active {
+  color: #fff;
+  background: #25231f;
+  border-color: #25231f;
+}
+
+.sheet-flag-btn.ds.active { background: #696158; border-color: #696158; }
+.sheet-warm-mark { color: #7d7368; font-size: 8px; font-weight: 850; margin-top: 4px; }
+
+.sheet-last {
+  min-height: 12px;
+  margin-top: 3px;
+  color: var(--sheet-last);
+  font-size: 8px;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.sheet-last strong { color: #5e574f; font-weight: 750; }
+
+.sheet-aim-col,
+.sheet-aim-cell {
+  width: 118px;
+  min-width: 118px;
+  max-width: 118px;
+}
+
+.sheet-aim-btn {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 2px;
+  color: #222;
+  font-size: 10px;
+  line-height: 1.18;
+  font-weight: 750;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.sheet-aim-btn.has-rec { text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 2px; }
+.sheet-aim-kind { display:block; color: #756b60; font-size: 8px; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
+
+.sheet-rir-col,
+.sheet-rir-cell {
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+}
+
+.sheet-rir-input {
+  width: 43px;
+  height: 30px;
+  border: 0;
+  border-bottom: 1px solid #9f9387;
+  background: transparent;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  outline: none;
+}
+
+.sheet-rep-aim-col,
+.sheet-rep-aim-cell {
+  width: 64px;
+  min-width: 64px;
+  max-width: 64px;
+}
+
+.sheet-rep-aim-cell {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sheet-control-col,
+.sheet-control-cell {
+  width: 54px;
+  min-width: 54px;
+  max-width: 54px;
+}
+
+.sheet-set-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+
+.sheet-set-control {
+  height: 27px;
+  border: 1px solid #b8ab9e;
+  border-radius: 3px;
+  background: transparent;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sheet-set-control:disabled { opacity: .28; }
+
+.sheet-workout-footer {
+  margin-top: 13px;
+}
+
+.sheet-workout-note {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+  margin: 8px 1px 14px;
+}
+
+.sheet-extra-settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  margin: 3px 0 12px;
+}
+
+.sheet-setting-field {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: .35px;
+}
+
+.sheet-setting-field input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  border: 0;
+  border-bottom: 1px solid #91887b;
+  background: rgba(255,255,255,.15);
+  text-align: center;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+}
+
+@media (max-width: 380px) {
+  .workout-sheet .sheet-exercise-col,
+  .workout-sheet .sheet-exercise-cell { width: 140px; min-width: 140px; max-width: 140px; }
+  .sheet-set-col, .sheet-set-cell, .sheet-warm-col, .sheet-warm-cell { width: 86px; min-width: 86px; max-width: 86px; }
+}

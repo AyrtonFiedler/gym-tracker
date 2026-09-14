@@ -32,7 +32,7 @@ body{min-height:100vh;}
 .v17-page button,.v17-page input,.v17-page textarea,.v17-page select{font:inherit;color:inherit;}
 .v17-hand{font-family:"Marker Felt","Bradley Hand","Segoe Print","Comic Sans MS",cursive;}
 .v17-system{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;}
-.v17-topbar{height:48px;display:grid;grid-template-columns:92px 1fr 92px;align-items:center;border-bottom:1px solid rgba(45,45,40,.08);margin-bottom:4px;}
+.v17-topbar{height:48px;display:grid;grid-template-columns:66px minmax(0,1fr) 44px;align-items:center;border-bottom:1px solid rgba(45,45,40,.08);margin-bottom:4px;}
 .v17-title{text-align:center;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:24px;line-height:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .v17-nav-left,.v17-nav-right{border:0;background:transparent;padding:8px 2px;font-size:17px;cursor:pointer;min-height:40px;}
 .v17-nav-left{text-align:left;}.v17-nav-right{text-align:right;}
@@ -42,20 +42,23 @@ body{min-height:100vh;}
 .v17-date{font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:14px;white-space:nowrap;padding-top:1px;}
 
 /* workout sheet */
-.v17-workout-scroll{width:calc(100% + 47px);margin-left:-34px;overflow-x:auto;-webkit-overflow-scrolling:touch;border-top:1px solid #9ea9aa;border-bottom:1px solid #9ea9aa;background:rgba(251,248,238,.76);scrollbar-width:none;}
-.v17-workout-scroll::-webkit-scrollbar{display:none;}
-.v17-workout-table{border-collapse:collapse;table-layout:fixed;min-width:100%;width:max-content;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:12px;background:rgba(251,248,238,.84);}
-.v17-workout-table th,.v17-workout-table td{border-right:1px solid var(--v17-grid);border-bottom:1px solid var(--v17-grid);padding:5px 2px;text-align:center;vertical-align:middle;height:42px;}
-.v17-workout-table th{height:34px;font-weight:500;font-size:12px;background:rgba(251,248,238,.97);}
+.v17-workout-scroll{width:calc(100% + 47px);margin-left:-34px;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #9ea9aa;background:var(--v17-paper);scrollbar-width:thin;scrollbar-color:#a8a397 var(--v17-paper2);overscroll-behavior-x:contain;}
+.v17-workout-table{border-collapse:separate;border-spacing:0;table-layout:fixed;min-width:100%;width:max-content;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:13px;background:var(--v17-paper);}
+.v17-workout-table th,.v17-workout-table td{border-right:1px solid var(--v17-grid);border-bottom:1px solid var(--v17-grid);padding:7px 5px;text-align:center;vertical-align:middle;}
+.v17-workout-table th{height:42px;font-weight:600;font-size:12px;background:var(--v17-paper2);}
 .v17-workout-table tr:last-child td{border-bottom:0}.v17-workout-table th:last-child,.v17-workout-table td:last-child{border-right:0}
-.v17-ex-col{width:82px;min-width:82px;max-width:82px;position:sticky;left:0;z-index:4;background:var(--v17-paper)!important;text-align:left!important;padding-left:7px!important;box-shadow:1px 0 0 var(--v17-grid);}
+.v17-ex-col{width:108px;min-width:108px;max-width:108px;position:sticky;left:0;z-index:4;background:var(--v17-paper)!important;text-align:left!important;padding-left:9px!important;box-shadow:2px 0 4px rgba(50,45,35,.08);}
 .v17-workout-table th.v17-ex-col{text-align:center!important;z-index:6;}
-.v17-warm-col{width:42px;min-width:42px;max-width:42px}.v17-set-col{width:44px;min-width:44px;max-width:44px}.v17-aim-col{width:76px;min-width:76px;max-width:76px;background:var(--v17-peach)!important}.v17-raim-col{width:52px;min-width:52px;max-width:52px}
-.v17-ex-name{display:block;border:0;background:transparent;text-align:left;padding:0;font:inherit;font-size:13px;line-height:1.08;cursor:pointer;width:100%;}
-.v17-cell-pair{display:flex;align-items:center;justify-content:center;gap:0;white-space:nowrap;}
-.v17-cell-input{width:19px;border:0;background:transparent;padding:0;text-align:center;outline:0;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:11px;line-height:1.1;}
-.v17-cell-input.v17-weight{width:25px}.v17-cell-input::placeholder{color:#8b8881;opacity:.58}.v17-cell-slash{font-size:10px;margin:0 1px;color:#4c4a46}
-.v17-aim-button{width:100%;border:0;background:transparent;padding:0 1px;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:10.5px;line-height:1.16;cursor:pointer;}
+.v17-warm-col,.v17-set-col{width:120px;min-width:120px;max-width:120px}.v17-aim-col{width:160px;min-width:160px;max-width:160px;background:var(--v17-peach)!important}.v17-raim-col{width:72px;min-width:72px;max-width:72px}
+.v17-page .v17-ex-name{display:block;border:0;background:transparent;text-align:left;padding:6px 0;font:inherit;font-size:13px;font-weight:600;line-height:1.4;cursor:pointer;width:100%;min-height:44px;overflow-wrap:anywhere;}
+.v17-cell-pair{display:grid;grid-template-columns:minmax(0,1fr) 24px;align-items:center;gap:4px 3px;min-width:0;}
+.v17-page .v17-cell-input{display:block;width:100%;min-width:0;height:44px;border:1px solid #bcb8ad;border-radius:6px;background:rgba(255,255,255,.74);padding:5px 4px;text-align:right;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:16px;font-variant-numeric:tabular-nums;line-height:1.25;}
+.v17-cell-input::placeholder{color:#817c71;opacity:.7}.v17-cell-slash,.v17-cell-label{font-size:10px;line-height:1.2;text-align:left;color:var(--v17-muted);overflow-wrap:anywhere;}
+.v17-page .v17-aim-button{width:100%;min-height:44px;border:0;background:transparent;padding:4px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:13px;line-height:1.45;cursor:pointer;text-align:left;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+.v17-aim-set{display:block;padding:4px 0;line-height:1.5}.v17-aim-set + .v17-aim-set{border-top:1px solid rgba(80,50,25,.13)}.v17-aim-set small{display:block;color:#75604e;font-size:10px;}
+.v17-workout-hint{margin:8px 0;color:var(--v17-muted);font-size:12px;line-height:1.45;}
+.v17-page input:focus-visible,.v17-page button:focus-visible,.v17-page textarea:focus-visible,.v17-workout-scroll:focus-visible{outline:2px solid #476c68;outline-offset:2px;}
+.v17-cell-pair:focus-within{border-radius:6px;background:#ede9db;}
 .v17-aim-button strong{font-weight:600}.v17-aim-empty{opacity:.45}
 .v17-raim{font-size:11px;white-space:nowrap;}
 .v17-add-ex{display:flex;align-items:center;gap:7px;width:100%;border:0;border-bottom:1px solid rgba(52,52,46,.15);background:transparent;padding:11px 6px;text-align:left;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:16px;cursor:pointer;}

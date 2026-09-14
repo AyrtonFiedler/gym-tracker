@@ -12,7 +12,10 @@
 .v17-inline{display:flex;align-items:center;gap:8px;margin:4px 5px 14px;}
 .v17-box-input{height:36px;border:1px solid #aeb5b3;border-radius:5px;background:rgba(255,255,255,.26);padding:2px 7px;text-align:center;outline:0;font-size:16px;min-width:0;}
 .v17-box-input.small{width:62px}.v17-box-input.tiny{width:54px}.v17-x{font-size:17px}.v17-unit{font-size:13px;}
-.v17-set-editor{display:grid;grid-template-columns:30px 58px 12px 58px 1fr;gap:5px;align-items:center;margin:4px 5px;min-height:39px;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;}
+.v17-set-editor{display:grid;grid-template-columns:24px minmax(0,1fr) 12px minmax(0,1fr);gap:6px;align-items:center;margin:8px 0;padding:10px 8px;border:1px solid #c7c2b5;border-radius:8px;background:rgba(255,255,255,.35);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;}
+.v17-page .v17-set-editor .v17-box-input{width:100%;height:44px;font-size:16px;font-variant-numeric:tabular-nums;background:rgba(255,255,255,.7);}
+.v17-set-editor .v17-checks{grid-column:2 / -1;justify-content:flex-start;gap:24px;}
+.v17-set-editor .v17-check-label{min-height:36px;font-size:13px;gap:7px;}
 .v17-set-num{text-align:center;font-size:15px}.v17-checks{display:flex;gap:12px;justify-content:flex-end;align-items:center;font-size:14px;}
 .v17-check-label{display:flex;align-items:center;gap:4px;cursor:pointer}.v17-check{appearance:none;-webkit-appearance:none;width:19px;height:19px;border:1.5px solid #383a37;border-radius:3px;background:rgba(255,255,255,.18);display:grid;place-items:center;margin:0}.v17-check:checked{background:#262623}.v17-check:checked::after{content:"✓";color:#fff;font-family:Arial,sans-serif;font-size:13px;font-weight:700;}
 .v17-add-set{border:0;border-radius:6px;background:#ece8de;padding:7px 11px;margin:7px 5px 13px;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:16px;cursor:pointer;}
@@ -20,7 +23,9 @@
 .v17-aim-title{font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:17px;margin-bottom:6px;}
 .v17-help{position:absolute;right:8px;top:8px;width:23px;height:23px;border:1.5px solid #222;border-radius:50%;background:transparent;font-weight:700;font-size:13px;cursor:pointer;}
 .v17-target-row{display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:wrap;}
-.v17-target-chip{height:34px;min-width:50px;border:1px solid #aeb5b3;border-radius:5px;background:rgba(255,255,255,.38);display:grid;place-items:center;padding:0 9px;font-size:15px;}
+.v17-target-chip{min-height:44px;max-width:100%;border:1px solid #c4a990;border-radius:6px;background:rgba(255,255,255,.5);padding:7px 10px;font-size:14px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}.v17-target-chip small{display:block;color:#75604e;font-size:11px;margin-bottom:3px;}
+.v17-aim-title{padding-right:28px;line-height:1.4;}
+.v17-page .v17-range-row{display:grid;grid-template-columns:54px 12px 54px 32px;gap:8px;align-items:center;}.v17-range-row > span:first-child{grid-column:1 / -1;}.v17-range-row .spacer{display:none;}
 .v17-aim-explain{text-align:center;font-size:10px;margin-top:5px;line-height:1.2;}
 .v17-range-row{display:flex;align-items:center;gap:8px;margin:8px 4px 13px;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;font-size:16px;}
 .v17-range-row .spacer{flex:1}.v17-textarea{width:100%;min-height:92px;border:1px solid #aeb5b3;border-radius:6px;background:rgba(255,255,255,.22);resize:vertical;padding:8px;font-size:15px;outline:0;font-family:"Marker Felt","Bradley Hand","Segoe Print",cursive;}

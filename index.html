@@ -16,16 +16,16 @@
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
     const files = [
-      './legacy.html?v=17',
-      './layout-v17-css-0.txt?v=17',
-      './layout-v17-css-1.txt?v=17',
-      './layout-v17-css-2.txt?v=17',
-      './layout-v17-js-0.txt?v=17',
-      './layout-v17-js-1.txt?v=17',
-      './layout-v17-js-2.txt?v=17',
-      './layout-v17-js-3.txt?v=17',
-      './layout-v17-js-4.txt?v=17',
-      './layout-v17-js-5.txt?v=17'
+      './legacy.html?v=18',
+      './layout-v17-css-0.txt?v=18',
+      './layout-v17-css-1.txt?v=18',
+      './layout-v17-css-2.txt?v=18',
+      './layout-v17-js-0.txt?v=18',
+      './layout-v17-js-1.txt?v=18',
+      './layout-v17-js-2.txt?v=18',
+      './layout-v17-js-3.txt?v=18',
+      './layout-v17-js-4.txt?v=18',
+      './layout-v17-js-5.txt?v=18'
     ];
 
     Promise.all(files.map(url => fetch(url).then(r => {

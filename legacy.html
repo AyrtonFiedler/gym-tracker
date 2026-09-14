@@ -1310,7 +1310,7 @@
         const descending = weights.every((w,i) => i === 0 || w <= weights[i-1] + 0.001);
         const pieces = weights.map((w,i) => `${formatWeight(w)}${isAssistance ? 'kg assist ' : 'kg '}×${targets[i]}`);
         return {
-          kind:'hold', weight:null, reps:targets, title:'Keep your set weights',
+          kind:'hold', weight:null, weights:weights.slice(), reps:targets, title:'Keep your set weights',
           main: pieces.join(' · '),
           note: `${descending ? 'Back-off set pattern detected.' : 'Mixed loads detected.'} Keep the same set weights and ${earlyFailures ? 'repeat the reps with less early failure' : 'add one total rep'}. ${confidence}.`
         };

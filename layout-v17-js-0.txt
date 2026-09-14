@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '17';
+  const VERSION = '18';
   const app = document.getElementById('app');
   document.getElementById('settingsFab')?.remove();
   document.getElementById('libraryFab')?.remove();
@@ -37,13 +37,14 @@
   function warmText(w){ if(!w)return''; const a=Number(w.weight),b=Number(w.reps); return Number.isFinite(a)&&Number.isFinite(b)&&b>0?`${formatWeight(a)}/${b}`:''; }
   function aimParts(day,ex){
     const cfg=exerciseConfig(ex), rec=recommendNext(day,ex);
-    if(!rec) return {rec:null,weight:'—',reps:[],compact:'—'};
-    let weight = Number.isFinite(rec.weight) ? formatWeight(rec.weight) : null;
-    let reps = Array.isArray(rec.reps)?rec.reps:[];
-    if(!weight && rec.main){ const m=String(rec.main).match(/([0-9]+(?:\.[0-9]+)?)\s*kg/i); if(m)weight=m[1]; }
-    if(!reps.length && rec.main){ const x=String(rec.main).match(/×\s*([0-9, ]+)/); if(x) reps=x[1].split(/[ ,]+/).filter(Boolean).map(Number); }
-    const compact = `${weight || (cfg.loadType==='assistance'?'assist':'—')}${reps.length?'/'+reps.join(' '):''}`;
-    return {rec,weight:weight||'—',reps,compact};
+    if(!rec) return {rec:null,sets:[]};
+    // Keep loads aligned with their recommended sets; never infer data from display text.
+    const sets=(rec.reps || []).map((reps,i)=>{
+      const weight=Array.isArray(rec.weights)?rec.weights[i]:rec.weight;
+      const load=`${formatWeight(weight)} ${data.unit}${cfg.loadType==='assistance'?' assist':''}`;
+      return {weight,reps,label:`${load} × ${reps}`};
+    });
+    return {rec,sets};
   }
 
   function armSvg(){return `<svg class="v17-arm-svg" viewBox="0 0 80 80" aria-hidden="true"><path d="M14 57c10-3 13-14 16-24 2-8 7-12 13-11 4 1 6 4 7 8 1 3 3 5 7 5 4 0 7-2 9-5 3 8 1 17-4 22-7 7-17 7-26 4-8-3-14 0-22 7"/><path d="M31 34c4 3 8 4 13 3M42 23c-1-5 2-10 7-12M50 12c5 3 8 8 8 14"/></svg>`;}
@@ -64,16 +65,18 @@
     renderHabitMini(document.getElementById('habitMini'));
   }
 
-  function makeInlinePair(state,cfg,prev,isWarm=false){
+  function makeInlinePair(state,cfg,prev,isWarm=false,context='Set'){
     const wrap=document.createElement('div'); wrap.className='v17-cell-pair';
     const w=document.createElement('input'); w.className='v17-cell-input v17-weight'; w.inputMode='decimal'; w.value=state.weight??''; w.placeholder=prev?.weight!==undefined&&prev?.weight!==''?formatWeight(Number(prev.weight)):(cfg.loadType==='assistance'&&!isWarm?'A':'');
-    const slash=document.createElement('span'); slash.className='v17-cell-slash'; slash.textContent='/';
+    const unit=document.createElement('span'); unit.className='v17-cell-label'; unit.textContent=cfg.loadType==='assistance'?'assist':data.unit;
     const r=document.createElement('input'); r.className='v17-cell-input'; r.inputMode='numeric'; r.value=state.reps??''; r.placeholder=prev?.reps||'';
+    const repsLabel=document.createElement('span'); repsLabel.className='v17-cell-label'; repsLabel.textContent='reps';
+    w.setAttribute('aria-label',`${context}, ${cfg.loadType==='assistance'?'assistance':'weight'} in ${data.unit}`); r.setAttribute('aria-label',`${context}, reps`);
     w.oninput=()=>{state.weight=w.value;saveData();}; r.oninput=()=>{state.reps=r.value;saveData();};
-    wrap.append(w,slash,r); return wrap;
+    wrap.append(w,unit,r,repsLabel); return wrap;
   }
 
   function showWorkout(dayId){
     currentDayId=dayId; const day=getDay(dayId); if(!day)return showWorkouts();
-    const quote=nextQuote(); const maxSets=3;
-    page(`<div id="tb"></div><div class="v17-quote-row"><div class="v17-quote">“${esc(quote)}”</div><div class="v17-date">${esc(todayLong())}</div></div><div class="v17-workout-scroll"><table class="v17-workout-table"><thead><tr><th class="v17-ex-col">Exercise</th><th class="v17-warm-col">W</th>${Array.from({length:maxSets},(_,i)=>`<th class="v17-set-col">${i+1}</th>`).join('')}<th class="v17-aim-col">AIM</th><th class="v17-raim-col">R-Aim</th></tr></thead><tbody id="workbody"></tbody></table></div><button class="v17-add-ex" id="addEx"><span style="font-family:Arial;font-size:22px">+</span> Add Exercise</button><div class="v17-workout-footer"><div class="v17-arm-note">${armSvg()}<span>“Progress<br>over perfection.”</span></div><button class="v17-primary" id="finish">Finish Workout</button><div class="v17-small-note">Tap an exercise name for full set controls, failure/drop-set buttons, notes and history.</div></div>`);
+    const quote=nextQuote(); const maxSets=Math.max(3,...day.exercises.map(ex=>exerciseSets(day.id,ex.id).length));
+    page(`<div id="tb"></div><div class="v17-quote-row"><div class="v17-quote">“${esc(quote)}”</div><div class="v17-date">${esc(todayLong())}</div></div><div class="v17-workout-hint">Weight and reps per set · Swipe to see all sets and Aim →</div><div class="v17-workout-scroll" tabindex="0" role="region" aria-label="Workout sets and targets"><table class="v17-workout-table"><thead><tr><th class="v17-ex-col">Exercise</th><th class="v17-warm-col">Warm-up</th>${Array.from({length:maxSets},(_,i)=>`<th class="v17-set-col">Set ${i+1}</th>`).join('')}<th class="v17-aim-col">AIM</th><th class="v17-raim-col">R-Aim</th></tr></thead><tbody id="workbody"></tbody></table></div><button class="v17-add-ex" id="addEx"><span style="font-family:Arial;font-size:22px">+</span> Add Exercise</button><div class="v17-workout-footer"><div class="v17-arm-note">${armSvg()}<span>“Progress<br>over perfection.”</span></div><button class="v17-primary" id="finish">Finish Workout</button><div class="v17-small-note">Tap an exercise name for full set controls, failure/drop-set buttons, notes and history.</div></div>`);

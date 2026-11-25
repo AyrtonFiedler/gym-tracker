@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '17';
+  const VERSION = '17.1';
   const app = document.getElementById('app');
   document.getElementById('settingsFab')?.remove();
   document.getElementById('libraryFab')?.remove();
@@ -55,6 +55,7 @@
   }
 
   function showWorkouts(){
+    autoFinishOverdue();
     currentDayId=null;
     page(`<div id="tb"></div><div class="v17-list" id="days"></div><button class="v17-list-row v17-add-row" id="addDay"><span><span class="plus">+</span>Add Workout</span></button><div class="v17-habit-mini" id="habitMini" aria-label="Last 30 days habits"></div>`);
     document.getElementById('tb').replaceWith(topbar('Workouts','‹','Edit',showMore,showSettings));
@@ -74,6 +75,7 @@
   }
 
   function showWorkout(dayId){
+    autoFinishOverdue();
     currentDayId=dayId; const day=getDay(dayId); if(!day)return showWorkouts();
     const quote=nextQuote(); const maxSets=3;
-    page(`<div id="tb"></div><div class="v17-quote-row"><div class="v17-quote">“${esc(quote)}”</div><div class="v17-date">${esc(todayLong())}</div></div><div class="v17-workout-scroll"><table class="v17-workout-table"><thead><tr><th class="v17-ex-col">Exercise</th><th class="v17-warm-col">W</th>${Array.from({length:maxSets},(_,i)=>`<th class="v17-set-col">${i+1}</th>`).join('')}<th class="v17-aim-col">AIM</th><th class="v17-raim-col">R-Aim</th></tr></thead><tbody id="workbody"></tbody></table></div><button class="v17-add-ex" id="addEx"><span style="font-family:Arial;font-size:22px">+</span> Add Exercise</button><div class="v17-workout-footer"><div class="v17-arm-note">${armSvg()}<span>“Progress<br>over perfection.”</span></div><button class="v17-primary" id="finish">Finish Workout</button><div class="v17-small-note">Tap an exercise name for full set controls, failure/drop-set buttons, notes and history.</div></div>`);
+    page(`<div id="tb"></div><div class="v17-quote-row"><div class="v17-quote">“${esc(quote)}”</div><div class="v17-date">${esc(todayLong())}</div></div><div class="v17-workout-scroll"><table class="v17-workout-table"><thead><tr><th class="v17-ex-col">Exercise</th><th class="v17-warm-col">W</th>${Array.from({length:maxSets},(_,i)=>`<th class="v17-set-col">${i+1}</th>`).join('')}<th class="v17-aim-col">AIM</th><th class="v17-raim-col">R-Aim</th></tr></thead><tbody id="workbody"></tbody></table></div><button class="v17-add-ex" id="addEx"><span style="font-family:Arial;font-size:22px">+</span> Add Exercise</button><div class="v17-workout-footer"><div class="v17-arm-note">${armSvg()}<span>“Progress<br>over perfection.”</span></div><button class="v17-primary" id="finish">Finish Workout</button><div class="v17-small-note">Unfinished workouts with completed working sets are saved automatically after midnight. Tap an exercise name for full set controls, notes and history.</div></div>`);

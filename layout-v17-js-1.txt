@@ -18,22 +18,77 @@
     document.getElementById('finish').onclick=()=>finishV17(day.id);
   }
 
-  function finishV17(dayId){
-    const day=getDay(dayId); if(!day)return;
-    const log=dayLog(dayId); const has=day.exercises.some(ex=>completedSets(log[ex.id]||[]).length>0); if(!has){alert('Enter at least one completed working set first.');return;}
-    if(!data.history[dayId])data.history[dayId]={}; const stamp=new Date().toISOString();
-    day.exercises.forEach(ex=>{
-      const sets=log[ex.id]||[], completed=completedSets(sets), warm=warmupFor(dayId,ex.id);
-      if(completed.length){
-        if(!data.history[dayId][ex.id])data.history[dayId][ex.id]=[];
-        const ww=Number(warm.weight),rr=Number(warm.reps); const warmup=Number.isFinite(ww)&&ww>=0&&Number.isFinite(rr)&&rr>0?{weight:ww,reps:rr}:null;
-        data.history[dayId][ex.id].push({date:stamp,warmup,sets:completed.map(s=>({weight:s.weight,reps:s.reps,failure:s.failure,dropset:s.dropset}))});
-        if(data.history[dayId][ex.id].length>30)data.history[dayId][ex.id].shift();
-      }
-      log[ex.id]=Array.from({length:Math.max(1,ex.defaultSets||completed.length||sets.length||1)},emptySet); warmupsForDay(dayId)[ex.id]={weight:'',reps:''};
-    });
-    saveData(); showWorkout(dayId);
+function workoutDateMap(){
+  if(!data.workoutDates || typeof data.workoutDates!=='object' || Array.isArray(data.workoutDates)) data.workoutDates={};
+  return data.workoutDates;
+}
+
+function hasWorkingSets(day){
+  const log=data.logs[day.id]||{};
+  return day.exercises.some(ex=>completedSets(log[ex.id]||[]).length>0);
+}
+
+function rememberWorkoutDates(now=new Date()){
+  const dates=workoutDateMap(), today=localDateKey(now);
+  for(const id of Object.keys(dates)){
+    if(!getDay(id)||!hasWorkingSets(getDay(id)))delete dates[id];
   }
+  for(const day of data.days){
+    if(!hasWorkingSets(day))continue;
+    const entry=dates[day.id];
+    if(!entry||!/^\d{4}-\d{2}-\d{2}$/.test(entry.day)||!Number.isFinite(Date.parse(entry.stamp))){
+      dates[day.id]={day:today,stamp:now.toISOString()};
+    }
+  }
+}
+
+function archiveWorkout(dayId,stamp){
+  const day=getDay(dayId); if(!day||!hasWorkingSets(day))return false;
+  const log=dayLog(dayId);
+  if(!data.history[dayId])data.history[dayId]={};
+  day.exercises.forEach(ex=>{
+    const sets=log[ex.id]||[], completed=completedSets(sets), warm=warmupFor(dayId,ex.id);
+    if(completed.length){
+      if(!data.history[dayId][ex.id])data.history[dayId][ex.id]=[];
+      const ww=Number(warm.weight),rr=Number(warm.reps);
+      const warmup=Number.isFinite(ww)&&ww>=0&&Number.isFinite(rr)&&rr>0?{weight:ww,reps:rr}:null;
+      data.history[dayId][ex.id].push({date:stamp,warmup,sets:completed.map(s=>({weight:s.weight,reps:s.reps,failure:s.failure,dropset:s.dropset}))});
+      if(data.history[dayId][ex.id].length>30)data.history[dayId][ex.id].shift();
+    }
+    log[ex.id]=Array.from({length:Math.max(1,ex.defaultSets||completed.length||sets.length||1)},emptySet);
+    warmupsForDay(dayId)[ex.id]={weight:'',reps:''};
+  });
+  delete workoutDateMap()[dayId];
+  return true;
+}
+
+function autoFinishOverdue(now=new Date(),skipDayId=null){
+  rememberWorkoutDates(now);
+  const dates=workoutDateMap(),today=localDateKey(now),finished=[];
+  for(const day of data.days){
+    const entry=dates[day.id];
+    if(day.id!==skipDayId && entry && entry.day<today && archiveWorkout(day.id,entry.stamp))finished.push(day.id);
+  }
+  if(finished.length)saveData();
+  return finished;
+}
+
+function finishV17(dayId){
+  const now=new Date();
+  rememberWorkoutDates(now);
+  const entry=workoutDateMap()[dayId];
+  const stamp=entry&&entry.day<localDateKey(now)?entry.stamp:now.toISOString();
+  if(!archiveWorkout(dayId,stamp)){alert('Enter at least one completed working set first.');return;}
+  saveData(); showWorkout(dayId);
+}
+
+function checkWorkoutRollover(){
+  if(document.hidden)return;
+  // Do not discard unsaved changes in the exercise editor.
+  const editing=document.getElementById('setEditor')?currentDayId:null;
+  const finished=autoFinishOverdue(new Date(),editing);
+  if(finished.includes(currentDayId)&&document.getElementById('workbody'))showWorkout(currentDayId);
+}
 
   function showExerciseEditor(dayId,exId){
     const day=getDay(dayId),ex=getEx(day,exId); if(!ex)return showWorkout(dayId); const cfg=exerciseConfig(ex), aim=aimParts(day,ex);

@@ -4,7 +4,15 @@
   function showDataTools(){page(`<div id="tb"></div><div class="v17-data-buttons"><button class="v17-secondary" id="export">Export backup</button><label class="v17-file-btn">Import backup<input type="file" id="import" accept="application/json,.json"></label><button class="v17-secondary" id="reset" style="color:#a52c22">Reset all app data</button></div><div class="v17-small-note">Export before switching phones or clearing Safari website data. Your workout history lives locally on this device.</div>`);document.getElementById('tb').replaceWith(topbar('Data','‹','',showMore));document.getElementById('export').onclick=downloadJson;document.getElementById('import').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const obj=JSON.parse(r.result);if(!obj||!Array.isArray(obj.days))throw 0;if(confirm('Replace current app data with this backup?')){localStorage.setItem(STORAGE_KEY,JSON.stringify(obj));location.reload();}}catch{alert('That does not look like a valid Gym Tracker backup.');}};r.readAsText(f);};document.getElementById('reset').onclick=()=>{if(confirm('Reset ALL workouts, history, habits and local data? This cannot be undone unless you exported a backup.')){localStorage.removeItem(STORAGE_KEY);location.reload();}}; }
   function showAbout(){page(`<div id="tb"></div><div class="v17-about"><strong>Gym Tracker</strong><p>Version ${VERSION} · Notebook interface.</p><p>Your workouts, habits, bodyweight and other tracker data are stored locally in your browser. GitHub hosts the app code, not your workout history.</p><p>AIM is your progressive-overload recommendation based on completed straight sets, exercise rep range, failure flags and your configured load increment.</p></div>`);document.getElementById('tb').replaceWith(topbar('About','‹','',showMore));}
 
+  // Track the first completed working set whenever the app saves a draft.
+  const persistData = saveData;
+  saveData = function(){ rememberWorkoutDates(); persistData(); };
+  saveData();
   renderHome = showWorkouts;
   renderWorkout = showWorkout;
   showWorkouts();
+  document.addEventListener('visibilitychange',checkWorkoutRollover);
+  window.addEventListener('pageshow',checkWorkoutRollover);
+  window.addEventListener('focus',checkWorkoutRollover);
+  setInterval(checkWorkoutRollover,15000);
 })();

@@ -1,4 +1,4 @@
-const CACHE = 'gym-tracker-v17-restored-20260916';
+const CACHE = 'gym-tracker-v17-1-auto-finish-20261125';
 const ASSETS = [
   './',
   './index.html',
